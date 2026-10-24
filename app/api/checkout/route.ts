@@ -1,9 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+function isAndroidTwa(req: NextRequest, bodyIsTwa?: boolean): boolean {
+  if (bodyIsTwa) return true
+  const xRequestedWith = (req.headers.get('x-requested-with') || '').toLowerCase()
+  if (xRequestedWith.includes('disputeninja') || xRequestedWith.includes('twa')) return true
+  const referer = (req.headers.get('referer') || '').toLowerCase()
+  if (referer.includes('android-app://')) return true
+  return false
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { disputeType = 'medical', creditorName = 'Creditor', disputedAmount = '0', productType = 'letter' } = await req.json().catch(() => ({}))
+    const { disputeType = 'medical', creditorName = 'Creditor', disputedAmount = '0', productType = 'letter', isTwa = false } = await req.json().catch(() => ({}))
+    if (isAndroidTwa(req, isTwa)) {
+      return NextResponse.json(
+        {
+          error: 'google_play_billing_required',
+          message: 'In-app digital purchases on Android must use Google Play Store billing. Please restore your purchase with your email or use the website.',
+          isAndroidApp: true,
+        },
+        { status: 403 }
+      )
+    }
     const isKit = productType === 'kit'
     const rawKey = process.env.STRIPE_SECRET_KEY || ''
     const stripeKey = rawKey.trim().replace(/[\r\n"']/g, '')

@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.disputeninja.twa",
+      "sha256_cert_fingerprints": [
+        "6A:15:3B:4D:30:D7:46:E9:BE:E8:A3:0E:1F:44:0E:A8:E5:26:F6:15:22:29:04:99:B5:F3:3C:B5:42:CB:7F:08",
+        "2E:1D:A8:0A:4A:89:88:C2:60:8A:03:E6:A8:E7:CE:9D:6C:2F:A0:C8:06:62:1A:21:F2:86:71:1D:7B:B9:CA:8F"
+      ]
+    }
+  }
+]
