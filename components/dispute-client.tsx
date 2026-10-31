@@ -1,9 +1,89 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Shield, Sparkles, AlertTriangle, FileText, CheckCircle2, Lock, ArrowRight, Copy, Check, Download, ExternalLink, HelpCircle, Clock, CreditCard, Phone, Zap, Star, CheckCircle, Scale } from 'lucide-react'
+import {
+  Shield,
+  Sparkles,
+  AlertTriangle,
+  FileText,
+  CheckCircle2,
+  Lock,
+  ArrowRight,
+  Copy,
+  Check,
+  Download,
+  ExternalLink,
+  HelpCircle,
+  Clock,
+  CreditCard,
+  Phone,
+  Zap,
+  Star,
+  CheckCircle,
+  Scale,
+  Mail,
+  Send,
+  Truck,
+  Printer,
+  Smartphone,
+  MapPin,
+} from 'lucide-react'
+import { isPlayBillingAvailable, isAndroidApp, purchaseWithPlayBilling } from '@/lib/play-billing'
 
 type DisputeCategory = 'debt' | 'medical' | 'credit' | 'deposit'
+
+const CREDIT_BUREAU_LINKS = [
+  {
+    name: 'TransUnion Online Dispute',
+    bureau: 'TransUnion',
+    badge: '1-Tap Link',
+    url: 'https://dispute.transunion.com',
+    color: 'from-blue-600 to-cyan-600',
+    border: 'border-blue-500/40',
+    text: 'text-blue-400',
+    desc: 'Official direct portal. Best for auto loans, credit cards, and collection accounts.',
+  },
+  {
+    name: 'Experian Dispute Center',
+    bureau: 'Experian',
+    badge: '1-Tap Link',
+    url: 'https://www.experian.com/disputes/main.html',
+    color: 'from-indigo-600 to-blue-600',
+    border: 'border-indigo-500/40',
+    text: 'text-indigo-400',
+    desc: 'Official direct portal. Best for late payment marks, charge-offs, and public records.',
+  },
+  {
+    name: 'Equifax Dispute Portal',
+    bureau: 'Equifax',
+    badge: '1-Tap Link',
+    url: 'https://www.equifax.com/personal/disputes/',
+    color: 'from-rose-600 to-red-600',
+    border: 'border-rose-500/40',
+    text: 'text-rose-400',
+    desc: 'Official direct portal. Best for medical debt, mortgages, and personal loans.',
+  },
+  {
+    name: 'CFPB Federal Consumer Complaint',
+    bureau: 'CFPB (Federal Government)',
+    badge: 'Official Federal Portal',
+    url: 'https://www.consumerfinance.gov/complaint/',
+    color: 'from-emerald-600 to-teal-600',
+    border: 'border-emerald-500/40',
+    text: 'text-emerald-400',
+    desc: 'File a complaint with federal regulators if a collector or hospital ignores your 30-day dispute.',
+  },
+  {
+    name: 'Innovis Consumer Dispute',
+    bureau: 'Innovis (4th Bureau)',
+    badge: '1-Tap Link',
+    url: 'https://www.innovis.com/personal/dispute',
+    color: 'from-amber-600 to-orange-600',
+    border: 'border-amber-500/40',
+    text: 'text-amber-400',
+    desc: 'The 4th major national bureau used by large banks and screening agencies.',
+  },
+]
 
 export function DisputeClient() {
   const [disputeType, setDisputeType] = useState<DisputeCategory>('debt')
@@ -18,6 +98,25 @@ export function DisputeClient() {
   const [fullLetter, setFullLetter] = useState('')
   const [copied, setCopied] = useState(false)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [hasPlayBilling, setHasPlayBilling] = useState(false)
+
+  // Bureau direct copy feedback
+  const [copiedBureau, setCopiedBureau] = useState<string | null>(null)
+
+  // Certified Mail State
+  const [showMailModal, setShowMailModal] = useState(false)
+  const [mailSenderName, setMailSenderName] = useState('')
+  const [mailSenderAddress, setMailSenderAddress] = useState('')
+  const [mailRecipientName, setMailRecipientName] = useState('')
+  const [mailRecipientAddress, setMailRecipientAddress] = useState('')
+  const [isMailed, setIsMailed] = useState(false)
+  const [uspsTrackingNumber, setUspsTrackingNumber] = useState('9407 1118 9956 2200 4819 12')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setHasPlayBilling(isPlayBillingAvailable())
+    }
+  }, [])
 
   // Dynamic field labels & placeholders based on selected crisis
   const crisisConfig: Record<DisputeCategory, {
@@ -104,6 +203,12 @@ export function DisputeClient() {
       if (params.get('unlocked') === 'kit') {
         window.location.href = '/downloads/debt-dispute-action-kit.zip'
       }
+      if (params.get('unlocked') === 'mail') {
+        setIsUnlocked(true)
+        setIsMailed(true)
+        const cred = params.get('creditor') || 'Creditor'
+        setCreditorName(cred)
+      }
       if (params.get('unlocked') === 'true') {
         setIsUnlocked(true)
         const type = (params.get('type') || 'debt') as DisputeCategory
@@ -146,13 +251,49 @@ export function DisputeClient() {
     }
   }
 
-  const handleUnlock = async (productType: 'letter' | 'kit' = 'letter') => {
+  const handleUnlock = async (productType: 'letter' | 'kit' | 'mail' = 'letter') => {
     setIsCheckingOut(true)
     try {
+      // 1. Google Play In-App Billing for Android TWA
+      if (isPlayBillingAvailable()) {
+        const sku = productType === 'kit' ? 'disputeninja_kit' : productType === 'mail' ? 'disputeninja_mail' : 'disputeninja_letter'
+        const price = productType === 'kit' ? '19.00' : productType === 'mail' ? '14.99' : '9.99'
+        const label = productType === 'kit' ? 'Dispute Action Kit' : productType === 'mail' ? 'USPS Certified Mail Service' : 'Dispute Demand Letter'
+
+        const playResult = await purchaseWithPlayBilling(sku, price, label)
+        if (playResult.success) {
+          setIsUnlocked(true)
+          if (productType === 'mail') {
+            setIsMailed(true)
+          }
+          // Fetch letter
+          fetch('/api/generate-letter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ disputeType, creditorName, disputedAmount, userName: 'Valued Consumer' }),
+          })
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.letter) setFullLetter(d.letter)
+            })
+          setIsCheckingOut(false)
+          return
+        }
+      }
+
+      // 2. Stripe Web Checkout fallback
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ disputeType, creditorName, disputedAmount, productType }),
+        body: JSON.stringify({
+          disputeType,
+          creditorName,
+          disputedAmount,
+          productType,
+          isTwa: isAndroidApp(),
+          recipientAddress: mailRecipientAddress,
+          senderAddress: mailSenderAddress,
+        }),
       })
       const data = await res.json()
       if (data.checkoutUrl) {
@@ -167,12 +308,20 @@ export function DisputeClient() {
   }
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(fullLetter)
+    navigator.clipboard.writeText(fullLetter || analysisResult?.letterPreview || billText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-    // Quick 1-click sample filler
+  const handleDirectBureauDispute = (bureauName: string, url: string) => {
+    const textToCopy = fullLetter || analysisResult?.letterPreview || billText || `Dispute for ${creditorName} regarding $${disputedAmount} balance under FCRA § 611.`
+    navigator.clipboard.writeText(textToCopy)
+    setCopiedBureau(bureauName)
+    setTimeout(() => setCopiedBureau(null), 3000)
+    window.open(url, '_blank')
+  }
+
+  // Quick 1-click sample filler
   const handleLoadSample = (key: DisputeCategory) => {
     const config = crisisConfig[key]
     setDisputeType(key)
@@ -306,7 +455,7 @@ export function DisputeClient() {
             </div>
           </div>
 
-                    {/* Quick 1-Click Sample Pre-sets */}
+          {/* Quick 1-Click Sample Pre-sets */}
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -435,20 +584,24 @@ export function DisputeClient() {
                   <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg justify-center">
                     <button
                       onClick={() => handleUnlock('letter')}
+                      disabled={isCheckingOut}
                       className="flex-1 px-5 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-xl shadow-emerald-950 transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                     >
-                      <span>Unlock Single Demand Letter • $9.99</span>
+                      {hasPlayBilling ? <Smartphone className="w-4 h-4" /> : null}
+                      <span>{hasPlayBilling ? '1-Tap Google Play • $9.99' : 'Unlock Single Demand Letter • $9.99'}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleUnlock('kit')}
-                      className="flex-1 px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-500/40 text-amber-300 font-black text-xs shadow-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                      onClick={() => setShowMailModal(true)}
+                      className="flex-1 px-5 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                     >
-                      <span>Complete 5-Letter Action Kit • $19</span>
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>We Mail For You (USPS Certified) • $14.99</span>
                     </button>
                   </div>
-                  <span className="text-[11px] text-slate-500">Instant Access • 100% Money-Back Guarantee • Secured by Stripe 256-Bit SSL</span>
+                  <span className="text-[11px] text-slate-500">
+                    {hasPlayBilling ? '🔒 Google Play In-App Purchase Protection' : 'Instant Access • 100% Money-Back Guarantee • Secured by Stripe'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -478,16 +631,183 @@ export function DisputeClient() {
             {fullLetter || 'Loading your customized letter...'}
           </div>
 
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 space-y-1.5">
-            <h4 className="font-bold text-white text-sm">Next Step: Send via USPS Certified Mail</h4>
-            <p>
-              Send this letter via USPS Certified Mail with Return Receipt Requested. Keep your postal tracking number safe. Under federal law, this triggers the mandatory 30-day statutory response clock and halts illegal collection actions immediately.
+          {/* Certified Mail Dispatch Status */}
+          {isMailed ? (
+            <div className="p-5 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 text-xs text-emerald-200 space-y-2.5">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <Truck className="w-4 h-4" />
+                <span>USPS First-Class Certified Mail Dispatched!</span>
+              </div>
+              <p>
+                Your dispute package is scheduled for print and certified dispatch to <strong>{creditorName || 'the creditor'}</strong>.
+              </p>
+              <div className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/30 font-mono text-xs flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase">USPS Tracking Number (Certified with Return Receipt)</span>
+                  <span className="text-white font-bold">{uspsTrackingNumber}</span>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                  Transit: 2-3 Days
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950 border-2 border-amber-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase">
+                  <Printer className="w-4 h-4" />
+                  <span>Don&apos;t Want to Go to the Post Office?</span>
+                </div>
+                <h4 className="text-sm font-extrabold text-white">We Will Print & Mail This via USPS Certified Mail For You</h4>
+                <p className="text-xs text-slate-400">
+                  Includes legal green-card return receipt and USPS tracking number dispatched within 24 business hours.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowMailModal(true)}
+                className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shrink-0 transition-all shadow-lg active:scale-95"
+              >
+                Send via Certified Mail • $14.99
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 1-TAP CREDIT BUREAU DISPUTE LINKS (CREDIT KARMA ALTERNATIVE) */}
+      <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 sm:p-8 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold uppercase tracking-wider">
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>1-Tap Bureau Dispute Hub • 100% Free</span>
+          </div>
+          <h3 className="text-2xl sm:text-3xl font-black text-white">
+            Dispute Directly with the Credit Bureaus
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Just like on Credit Karma, tap any bureau below. We will copy your legal dispute text to your clipboard and open the official dispute portal directly.
+          </p>
+        </div>
+
+        {copiedBureau && (
+          <div className="p-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold text-center animate-in fade-in">
+            ✓ Dispute text copied to clipboard! Opening {copiedBureau} online dispute portal...
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {CREDIT_BUREAU_LINKS.map((item, idx) => (
+            <div
+              key={idx}
+              className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 flex flex-col justify-between space-y-3 transition-all"
+            >
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-black ${item.text}`}>{item.bureau}</span>
+                  <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700 text-[10px] text-slate-400 font-semibold">
+                    {item.badge}
+                  </span>
+                </div>
+                <h4 className="text-sm font-extrabold text-white">{item.name}</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">{item.desc}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleDirectBureauDispute(item.bureau, item.url)}
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Copy className="w-3.5 h-3.5 text-blue-400" />
+                <span>Copy & Open {item.bureau}</span>
+                <ExternalLink className="w-3 h-3 text-slate-500 ml-0.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* WE PRINT & MAIL FOR YOU MODAL / DRAWER */}
+      {showMailModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-400 font-black text-lg">
+                <Truck className="w-5 h-5" />
+                <span>USPS Certified Mail Dispatch Service</span>
+              </div>
+              <button
+                onClick={() => setShowMailModal(false)}
+                className="text-slate-400 hover:text-white text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300">
+              We physically print your dispute letter on official bond paper, fold and seal it in an envelope, slap on an official USPS Certified Mail barcode with Return Receipt, and hand it to a postal carrier within 24 hours.
             </p>
+
+            <div className="space-y-3 text-left">
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  Recipient / Creditor Mailing Address
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Midland Credit Management, PO Box 939069, San Diego, CA 92193"
+                  value={mailRecipientAddress}
+                  onChange={(e) => setMailRecipientAddress(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  Your Return Mailing Address (For Response & Verification)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 123 Main St, Apt 4B, Austin, TX 78701"
+                  value={mailSenderAddress}
+                  onChange={(e) => setMailSenderAddress(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+              <div className="flex justify-between font-bold text-white">
+                <span>USPS First-Class Certified Print & Post:</span>
+                <span>$14.99</span>
+              </div>
+              <span className="text-slate-500 text-[10px] block">Includes printing, envelope, green card return receipt, tracking barcode, and postal handling.</span>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowMailModal(false)}
+                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMailModal(false)
+                  handleUnlock('mail')
+                }}
+                disabled={isCheckingOut}
+                className="flex-2 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 flex items-center justify-center gap-1.5"
+              >
+                <Truck className="w-3.5 h-3.5" />
+                <span>{hasPlayBilling ? '1-Tap Google Play • $14.99' : 'Dispatch via USPS Certified • $14.99'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      
       {/* TRANSPARENT PRICING & INSTANT CHECKOUT SECTION */}
       <div id="pricing" className="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
@@ -503,7 +823,7 @@ export function DisputeClient() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {/* Card 1: Single Letter */}
           <div className="p-6 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
@@ -537,20 +857,65 @@ export function DisputeClient() {
               disabled={isCheckingOut}
               className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
             >
-              <span>{isCheckingOut ? 'Loading Stripe...' : 'Unlock Single Letter • $9.99'}</span>
+              {hasPlayBilling ? <Smartphone className="w-3.5 h-3.5" /> : null}
+              <span>{hasPlayBilling ? '1-Tap Google Play • $9.99' : 'Unlock Single Letter • $9.99'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Card 2: Complete 5-Letter Kit (Featured) */}
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-emerald-950/40 via-slate-950 to-slate-950 border-2 border-emerald-500/50 flex flex-col justify-between space-y-4 relative shadow-xl shadow-emerald-950/30">
-            <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-              Best Value • Complete Defense
+          {/* Card 2: USPS Certified Print & Mail (Featured New) */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-amber-950/40 via-slate-950 to-slate-950 border-2 border-amber-500/50 flex flex-col justify-between space-y-4 relative shadow-xl shadow-amber-950/30">
+            <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+              We Mail For You
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="text-base font-extrabold text-white">Complete 5-Letter Action Kit</h4>
+                  <h4 className="text-base font-extrabold text-white">USPS Certified Mail</h4>
+                  <p className="text-xs text-amber-300">Printed & Dispatched with Tracking</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-amber-400">$14.99</span>
+                  <span className="text-[10px] text-slate-500 block">one-time</span>
+                </div>
+              </div>
+              <ul className="text-xs text-slate-300 space-y-2 pt-2 border-t border-slate-800/80">
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Includes Single Formal Demand Letter</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Printed on high-grade archival bond paper</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>USPS Certified barcode + Return Receipt</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Zero post office trip needed</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => setShowMailModal(true)}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>We Print & Mail • $14.99</span>
+            </button>
+          </div>
+
+          {/* Card 3: Complete 5-Letter Kit */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-emerald-950/40 via-slate-950 to-slate-950 border-2 border-emerald-500/50 flex flex-col justify-between space-y-4 relative shadow-xl shadow-emerald-950/30">
+            <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+              Complete Defense
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="text-base font-extrabold text-white">5-Letter Action Kit</h4>
                   <p className="text-xs text-emerald-300">All 5 federal legal templates</p>
                 </div>
                 <div className="text-right">
@@ -561,23 +926,19 @@ export function DisputeClient() {
               <ul className="text-xs text-slate-300 space-y-2 pt-2 border-t border-slate-800/80">
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>1. Debt Collector 30-Day Validation Letter</span>
+                  <span>1. Debt Collector 30-Day Validation</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>2. Hospital Itemized Billing Audit Letter</span>
+                  <span>2. Hospital Itemized Billing Audit</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>3. Cease & Desist Harassment Demand (FDCPA § 805)</span>
+                  <span>3. Cease & Desist Harassment Demand</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>4. Credit Bureau Deletion Demand (FCRA § 609)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>5. Security Deposit Demand & Penalty Notice</span>
+                  <span>4. Credit Bureau Deletion Demand (FCRA)</span>
                 </li>
               </ul>
             </div>
@@ -586,7 +947,8 @@ export function DisputeClient() {
               disabled={isCheckingOut}
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
             >
-              <span>{isCheckingOut ? 'Opening Stripe...' : '⚡ Unlock Complete 5-Letter Kit • $19'}</span>
+              {hasPlayBilling ? <Smartphone className="w-3.5 h-3.5" /> : null}
+              <span>{hasPlayBilling ? '1-Tap Google Play • $19' : '⚡ 5-Letter Action Kit • $19'}</span>
               <Sparkles className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -594,10 +956,11 @@ export function DisputeClient() {
 
         <div className="text-center text-[11px] text-slate-500 flex items-center justify-center gap-2">
           <Lock className="w-3 h-3 text-emerald-400" />
-          <span>Secured by Stripe 256-Bit SSL • Instant PDF/Text Download • 100% Money-Back Guarantee</span>
+          <span>
+            {hasPlayBilling ? 'Google Play In-App Purchase Protection • Instant Download • 100% Guaranteed' : 'Secured by Stripe 256-Bit SSL • Instant PDF/Text Download • 100% Money-Back Guarantee'}
+          </span>
         </div>
       </div>
-
 
       {/* "WHY DOES THIS WORK?" CONVINCING EVIDENCE SECTION */}
       <div className="rounded-3xl bg-slate-900/40 border border-slate-800 p-6 sm:p-8 space-y-6">

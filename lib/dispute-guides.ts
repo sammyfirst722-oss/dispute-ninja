@@ -527,6 +527,361 @@ export const DISPUTE_GUIDES: DisputeGuide[] = [
     }
   ]
 }
+,
+  {
+    "slug": "quest-diagnostics-unauthorized-lab-fees",
+    "title": "Dispute Quest Diagnostics Surprise Lab Bills",
+    "metaDescription": "Learn how to dispute unapproved Quest Diagnostics lab bills under federal law, the No Surprises Act, and Clinical Laboratory Improvement Amendments.",
+    "badge": "Federal Law",
+    "statute": "No Surprises Act (42 U.S.C. § 300gg-111) & Fair Credit Billing Act",
+    "statutoryDeadline": "Within 60–120 days from billing date",
+    "estimatedSavings": "$200 – $3,500 per test panel",
+    "summary": "Patients visiting in-network physicians frequently receive surprise out-of-network bills from Quest Diagnostics because specimens were sent out without upfront informed consent. Under the No Surprises Act and provider network contracts, unauthorized out-of-network lab fees can be legally challenged and reduced to in-network contracted rates.",
+    "steps": [
+      {
+        "title": "Request the Original Physician Lab Order",
+        "description": "Obtain the exact signed lab requisition form from your ordering physician to confirm whether you signed a voluntary out-of-network consent waiver."
+      },
+      {
+        "title": "Cross-Reference With Your Insurance EOB",
+        "description": "Compare Quest's billed amount against your insurer's Explanation of Benefits to verify allowable in-network diagnostic rates."
+      },
+      {
+        "title": "Send Formal Demand for Network Recalculation",
+        "description": "Demand in writing that Quest Diagnostics re-bill your insurer under in-network cost-sharing guidelines and suspend collection activity."
+      },
+      {
+        "title": "File an Administrative Grievance",
+        "description": "Escalate to the CMS No Surprises Help Desk and your state department of insurance if Quest continues to bill you the out-of-network balance."
+      }
+    ],
+    "legalGrounds": [
+      "No Surprises Act 42 U.S.C. § 300gg-111 prohibits balance billing for lab services originating at in-network facilities",
+      "Lack of advance statutory Good Faith Estimate under 45 C.F.R. § 149.610",
+      "Breach of participating provider network referral obligations"
+    ],
+    "sampleSnippet": "I formally dispute the unapproved out-of-network laboratory charges billed under Account #[Number]. My specimen was collected at an in-network facility without prior written consent for out-of-network testing. Under 42 U.S.C. § 300gg-111, my liability is limited strictly to in-network cost-sharing. Cease all collection activity and rebill accordingly.",
+    "faqs": [
+      {
+        "question": "Can Quest Diagnostics send me to collections if my bill is in dispute?",
+        "answer": "No. Under the Fair Credit Billing Act (15 U.S.C. § 1666) and CFPB regulations, creditors cannot report or send an account to collections while a timely written dispute is actively pending."
+      },
+      {
+        "question": "What if my doctor sent my bloodwork to Quest without telling me?",
+        "answer": "You cannot be held responsible for surprise out-of-network balance bills when the ordering provider failed to provide an advance disclosure and consent waiver required by federal law."
+      }
+    ]
+  },
+  {
+    "slug": "labcorp-out-of-network-test-dispute",
+    "title": "Fight Unapproved Labcorp Out-of-Network Tests",
+    "metaDescription": "Step-by-step legal dispute guide for surprise Labcorp charges, unauthorized routine lab panels, and billing code errors.",
+    "badge": "Federal Law",
+    "statute": "No Surprises Act & 45 C.F.R. § 149.420",
+    "statutoryDeadline": "Within 90 days of receiving the invoice",
+    "estimatedSavings": "$150 – $2,800",
+    "summary": "Labcorp bills thousands of patients annually for non-covered specialized panels that ordering physicians check as routine reflex tests. Learn how to invoke federal balance billing prohibitions and force code re-audits.",
+    "steps": [
+      {
+        "title": "Identify Misclassified Reflex Testing",
+        "description": "Check if Labcorp automatically triggered secondary specialized tests that were not explicitly ordered as medically necessary by your doctor."
+      },
+      {
+        "title": "Submit a Formal Dispute Letter",
+        "description": "Notify Labcorp in writing citing lack of informed consent and demand itemized CPT coding verification."
+      },
+      {
+        "title": "Request Provider Appeal Assistance",
+        "description": "Ask your physician's billing staff to submit a retroactive Letter of Medical Necessity to reverse insurance denials."
+      }
+    ],
+    "legalGrounds": [
+      "Federal prohibition against surprise laboratory billing at in-network provider visits",
+      "Unauthorized unbundling of routine blood chemistry panels under AMA CPT guidelines"
+    ],
+    "sampleSnippet": "This letter serves as formal dispute of Labcorp Invoice #[Number]. The billed testing was performed without prior written authorization or disclosure of out-of-network rates. Pursuant to federal consumer billing standards, I demand a full audit and adjustment to in-network allowable rates.",
+    "faqs": [
+      {
+        "question": "Why did Labcorp charge me if my doctor is in-network?",
+        "answer": "Independent laboratories often operate outside your specific insurance tier even if your primary doctor's office is in-network. Federal law now restricts providers from balance-billing you for these surprise referrals."
+      }
+    ]
+  },
+  {
+    "slug": "emergency-room-facility-fee-dispute",
+    "title": "Dispute Inflated ER Hospital Facility Fees",
+    "metaDescription": "How to challenge hospital Level 4 and Level 5 emergency room facility fees and reduce hospital bills by thousands.",
+    "badge": "Federal Law",
+    "statute": "Emergency Medical Treatment and Active Labor Act (EMTALA) & State Pricing Statutes",
+    "statutoryDeadline": "Within 60 days of bill receipt",
+    "estimatedSavings": "$1,200 – $6,000 per visit",
+    "summary": "Hospitals routinely add arbitrary 'facility fees' (often $1,500 to $4,000+) to ER bills simply for walking through the door, even for minor triage visits. Under hospital transparency rules and billing guidelines, patients have the right to challenge inflated facility fee level codes.",
+    "steps": [
+      {
+        "title": "Demand an Itemized UB-04 Form",
+        "description": "Request the official hospital claim form showing Revenue Codes (typically Revenue Code 0450) and HCPCS/CPT Level codes (99281 through 99285)."
+      },
+      {
+        "title": "Audit the Severity Level Coding",
+        "description": "Hospitals often improperly upcode routine visits to Level 4 (99284) or Level 5 (99285) without meeting the clinical documentation requirements for high-complexity medical decision-making."
+      },
+      {
+        "title": "Send a Facility Fee Dispute & Fee-Waiver Demand",
+        "description": "Demand a downward code adjustment to Level 1 or 2, or request complete fee waiver under hospital charity care policies."
+      }
+    ],
+    "legalGrounds": [
+      "Improper upcoding of facility fees violates False Claims and state deceptive billing practices acts",
+      "Federal Hospital Price Transparency Rule mandates public disclosure of standard charges"
+    ],
+    "sampleSnippet": "I am writing to contest the Emergency Department Facility Fee of $[Amount] coded under CPT 99285 on Account #[Number]. The clinical intervention provided did not involve high-complexity medical decision making. I demand an itemized coding audit and downward fee adjustment.",
+    "faqs": [
+      {
+        "question": "What is an ER facility fee?",
+        "answer": "A facility fee is an overhead charge billed by the hospital building itself, separate from the doctor's professional fee, to cover equipment, nursing staff, and operating costs."
+      },
+      {
+        "question": "Can facility fees be negotiated or removed?",
+        "answer": "Yes. Hospitals frequently reduce or eliminate facility fees when patients formally challenge the complexity level code or request charity care review."
+      }
+    ]
+  },
+  {
+    "slug": "midland-credit-management-validation-letter",
+    "title": "Demand Validation from Midland Credit Management",
+    "metaDescription": "Stop collection calls and freeze accounts from Midland Credit Management using an official FDCPA debt validation demand.",
+    "badge": "Federal Law",
+    "statute": "Fair Debt Collection Practices Act (15 U.S.C. § 1692g) & CFPB Consent Order",
+    "statutoryDeadline": "Within 30 days of initial notice",
+    "estimatedSavings": "Full debt dismissal / removal from credit",
+    "summary": "Midland Credit Management (MCM/Encore Capital) is the largest debt buyer in the nation. Under federal law and CFPB consent orders, Midland cannot collect on purchased debt without chain-of-title proof, original signed contracts, and verified itemized accounting.",
+    "steps": [
+      {
+        "title": "Do Not Acknowledge Debt on the Phone",
+        "description": "Never agree to a phone payment or verbally confirm owing the debt, which can reset expired state statutes of limitations."
+      },
+      {
+        "title": "Send FDCPA § 809 Debt Validation Demand",
+        "description": "Send a formal written letter demanding proof of ownership, original creditor account agreement, and chain-of-assignment records."
+      },
+      {
+        "title": "Enforce the 30-Day Mandatory Collection Freeze",
+        "description": "By federal law, Midland must cease all telephone calls and collection efforts until they mail complete written verification."
+      }
+    ],
+    "legalGrounds": [
+      "15 U.S.C. § 1692g requires complete verification before continuing collection activity",
+      "CFPB Consent Decree strictly bars Midland from collecting debts without verified account documentation",
+      "15 U.S.C. § 1692e prohibits false representations regarding debt amounts or legal status"
+    ],
+    "sampleSnippet": "Pursuant to the Fair Debt Collection Practices Act, 15 U.S.C. § 1692g, I dispute the validity of the debt referenced under MCM Reference #[Number]. I demand verification of the original signed contract, complete chain of title assignment, and itemized calculation of interest and fees. Cease all telephone contact.",
+    "faqs": [
+      {
+        "question": "What happens if Midland cannot validate the debt within 30 days?",
+        "answer": "They must cease collection activity and remove any negative reporting marks submitted to TransUnion, Experian, or Equifax."
+      }
+    ]
+  },
+  {
+    "slug": "portfolio-recovery-associates-dispute",
+    "title": "Stop Portfolio Recovery Associates Debt Harassment",
+    "metaDescription": "How to stop calls, demand validation, and dispute unverified debts from Portfolio Recovery Associates (PRA Group).",
+    "badge": "Federal Law",
+    "statute": "FDCPA (15 U.S.C. § 1692) & CFPB Enforcement Orders",
+    "statutoryDeadline": "30-day statutory window",
+    "estimatedSavings": "Up to 100% debt reduction",
+    "summary": "Portfolio Recovery Associates buys delinquent consumer accounts for pennies on the dollar. Force them to provide documentation or dismiss the account under federal debt validation laws.",
+    "steps": [
+      {
+        "title": "Send Formal Cease Communication Notice",
+        "description": "Demand in writing under FDCPA § 805(c) that PRA cease calling your personal or workplace phone numbers."
+      },
+      {
+        "title": "Demand Chain-of-Title & Balance Itemization",
+        "description": "Require proof of the bill of sale transferring the specific account from the original creditor to PRA."
+      }
+    ],
+    "legalGrounds": [
+      "FDCPA § 805(c) right to cease debt collector communications",
+      "FDCPA § 809 debt validation requirements",
+      "CFPB statutory bar on collecting unsubstantiated debt portfolios"
+    ],
+    "sampleSnippet": "I dispute this alleged debt under 15 U.S.C. § 1692g. Demanding full chain of custody documentation proving PRA's legal right to collect on Account #[Number]. All telephone calls are strictly refused; all future communications must be in writing.",
+    "faqs": [
+      {
+        "question": "Can PRA sue me for old credit card debt?",
+        "answer": "Only if the debt is within your state's statute of limitations (typically 3 to 6 years). Threatening to sue on time-barred debt violates federal law."
+      }
+    ]
+  },
+  {
+    "slug": "lvnv-funding-zombie-debt-dispute",
+    "title": "Fight LVNV Funding Time-Barred Zombie Debt",
+    "metaDescription": "Dispute old zombie debt and collection lawsuits from LVNV Funding and Resurgent Capital Services using federal statutes of limitations.",
+    "badge": "Federal Law",
+    "statute": "FDCPA (15 U.S.C. § 1692e) & State Statutes of Limitations",
+    "statutoryDeadline": "Immediately upon notice",
+    "estimatedSavings": "Complete debt dismissal",
+    "summary": "LVNV Funding and Resurgent Capital frequently pursue 'zombie debt' where the legal statute of limitations for filing a lawsuit has already expired. Assert your affirmative legal defense in writing.",
+    "steps": [
+      {
+        "title": "Check Date of First Delinquency (DOFD)",
+        "description": "Review your credit report to locate the exact date when the original account first went delinquent."
+      },
+      {
+        "title": "Send Time-Barred Debt Estoppel Demand",
+        "description": "Notify LVNV Funding that the statute of limitations has run out and that any threat of legal action violates federal law."
+      }
+    ],
+    "legalGrounds": [
+      "CFPB Regulation F prohibits debt collectors from suing or threatening to sue on time-barred debt",
+      "15 U.S.C. § 1692e(2) false representation of debt legal enforceability"
+    ],
+    "sampleSnippet": "The alleged debt on Account #[Number] is time-barred under the applicable state statute of limitations. Under 15 U.S.C. § 1692e and CFPB Regulation F, collecting or threatening litigation on time-barred accounts is unlawful. Close this file and cease collection immediately.",
+    "faqs": [
+      {
+        "question": "What is zombie debt?",
+        "answer": "Zombie debt is debt that has passed the state statute of limitations for legal collection, but debt buyers attempt to revive it through aggressive letters and calls."
+      }
+    ]
+  },
+  {
+    "slug": "radiology-reading-fee-double-billing",
+    "title": "Dispute Surprise Out-of-Network Radiology Fees",
+    "metaDescription": "How to challenge unexpected separate bills from radiologists, pathologists, and imaging centers after in-network hospital visits.",
+    "badge": "Federal Law",
+    "statute": "No Surprises Act (42 U.S.C. § 300gg-111(b))",
+    "statutoryDeadline": "120 days from billing",
+    "estimatedSavings": "$300 – $2,500",
+    "summary": "Patients having an X-ray, MRI, or CT scan at an in-network facility frequently receive a surprise bill months later from an independent radiology group that read the scan. Under the No Surprises Act, radiologists at in-network facilities are strictly barred from balance billing patients.",
+    "steps": [
+      {
+        "title": "Confirm the Imaging Facility Was In-Network",
+        "description": "Verify that the hospital or clinic where your scan occurred participates with your insurance plan."
+      },
+      {
+        "title": "Issue a No Surprises Ancillary Service Demand",
+        "description": "Inform the radiology practice that ancillary services rendered at in-network facilities are covered under 42 U.S.C. § 300gg-111."
+      }
+    ],
+    "legalGrounds": [
+      "No Surprises Act explicitly defines radiology and pathology as non-waivable ancillary services barred from balance billing",
+      "Patient responsibility is restricted by law to in-network deductible and copay rates"
+    ],
+    "sampleSnippet": "Under 42 U.S.C. § 300gg-111(b), radiology services performed at an in-network facility are non-waivable ancillary services. I cannot be balance-billed for out-of-network professional interpretation fees. Adjust this balance to in-network rates immediately.",
+    "faqs": [
+      {
+        "question": "Can an out-of-network radiologist ask me to sign a waiver?",
+        "answer": "No. Federal regulations explicitly prohibit out-of-network radiologists and anesthesiologists from asking patients to sign balance billing waivers."
+      }
+    ]
+  },
+  {
+    "slug": "charity-care-financial-assistance-retroactive",
+    "title": "Apply for Retroactive Hospital Charity Care & Forgiveness",
+    "metaDescription": "Complete guide to wiping out hospital bills through mandatory nonprofit hospital financial assistance and charity care policies.",
+    "badge": "Federal Law",
+    "statute": "IRS Section 501(r)(4) & Affordable Care Act",
+    "statutoryDeadline": "Up to 240 days from first post-discharge billing statement",
+    "estimatedSavings": "Up to 100% total bill forgiveness",
+    "summary": "By federal law, all nonprofit 501(c)(3) hospitals must provide Financial Assistance Policies (Charity Care) providing 50% to 100% bill forgiveness for families earning under 300% to 400% of the Federal Poverty Level, even retroactively after bills are sent to collections.",
+    "steps": [
+      {
+        "title": "Verify Nonprofit Hospital Status",
+        "description": "Check if the hospital is classified as a 501(c)(3) nonprofit institution (over 60% of all US hospitals are nonprofits)."
+      },
+      {
+        "title": "Submit a Retroactive Financial Assistance Application",
+        "description": "Request the hospital's Plain Language Summary of Financial Assistance and submit proof of income within the 240-day federal window."
+      },
+      {
+        "title": "Enforce Mandatory Collection Recall",
+        "description": "Under IRS rules, the hospital must pause or recall all collection actions while your financial assistance application is evaluated."
+      }
+    ],
+    "legalGrounds": [
+      "26 U.S.C. § 501(r) prohibits extraordinary collection actions prior to making reasonable efforts to determine charity care eligibility",
+      "IRS Treasury Regulation § 1.501(r)-6 mandates 240-day application period"
+    ],
+    "sampleSnippet": "I am formally requesting a Financial Assistance Application under IRS Section 501(r) for Account #[Number]. Pursuant to federal regulations, you must suspend all extraordinary collection actions and credit reporting while my eligibility is reviewed.",
+    "faqs": [
+      {
+        "question": "Can I apply for hospital charity care if my bill was already sent to collections?",
+        "answer": "Yes. Federal law grants patients a 240-day window from the first billing statement to apply, which legally forces the hospital to recall the account from third-party debt collection."
+      }
+    ]
+  },
+  {
+    "slug": "security-deposit-carpet-wear-and-tear",
+    "title": "Dispute Unfair Carpet Replacement Deductions",
+    "metaDescription": "How to dispute landlord security deposit deductions for carpet replacement, routine wear and tear, and depreciated flooring.",
+    "badge": "State & Common Law",
+    "statute": "Uniform Residential Landlord and Tenant Act (URLTA) & State Tenancy Statutes",
+    "statutoryDeadline": "14 to 30 days depending on state",
+    "estimatedSavings": "$500 – $2,500",
+    "summary": "Landlords frequently bill departing tenants thousands to replace carpet that was already years old. Under common law and state tenant rights, landlords can only deduct for actual damage exceeding normal wear and tear, and must account for IRS carpet depreciation schedules (typically 5 to 7-year useful life).",
+    "steps": [
+      {
+        "title": "Demand Age and Purchase Invoices",
+        "description": "Require the landlord to produce the original purchase receipt and installation date of the carpet."
+      },
+      {
+        "title": "Apply Straight-Line Depreciation",
+        "description": "If carpet has a 7-year lifespan and was 5 years old at move-out, the landlord cannot legally charge you full replacement cost."
+      },
+      {
+        "title": "Send Formal Demand for Full Deposit Return",
+        "description": "Notify the landlord that deducting for ordinary wear and tear violates state law and exposes them to double or triple statutory damages."
+      }
+    ],
+    "legalGrounds": [
+      "Common law doctrine bars deduction for ordinary wear and tear resulting from normal residential occupancy",
+      "Landlord duty to mitigate damages using IRS asset depreciation standards",
+      "Statutory penalties for bad-faith deposit retention"
+    ],
+    "sampleSnippet": "I dispute the $[Amount] deduction for carpet replacement from my security deposit for [Rental Address]. Carpet discoloration constitutes ordinary wear and tear under state tenancy law. Furthermore, you have failed to account for useful life depreciation. I demand the immediate refund of $[Amount] within 10 days.",
+    "faqs": [
+      {
+        "question": "Can a landlord charge me for a brand new carpet if I stained one room?",
+        "answer": "No. Landlords cannot upgrade flooring at your expense. They can only charge for localized repair, or the depreciated value of the damaged portion."
+      }
+    ]
+  },
+  {
+    "slug": "expired-statute-of-limitations-debt",
+    "title": "Dispute Expired Time-Barred Debt",
+    "metaDescription": "How to permanently dismiss old debt after the legal statute of limitations has expired using federal FDCPA defense letters.",
+    "badge": "Federal Law",
+    "statute": "FDCPA (15 U.S.C. § 1692e) & CFPB Regulation F (12 C.F.R. § 1006.26)",
+    "statutoryDeadline": "Assert immediately upon contact",
+    "estimatedSavings": "Complete debt cancellation",
+    "summary": "Every state sets a legal deadline (typically 3 to 6 years) after which creditors and debt collectors lose the legal right to sue you in court. Under CFPB rules, debt collectors are strictly prohibited from suing or threatening to sue on time-barred debt.",
+    "steps": [
+      {
+        "title": "Calculate the State Statute of Limitations",
+        "description": "Determine the legal time limit based on your state of residence and the contract type (written contract, open account, promissory note)."
+      },
+      {
+        "title": "Avoid Making Any Payments",
+        "description": "Never make even a $1 token payment, which in many states legally resets the clock on expired debt."
+      },
+      {
+        "title": "Send Time-Barred Affirmative Defense Notice",
+        "description": "Issue a formal written demand informing the collector that the debt is time-barred and requiring them to close their collection file."
+      }
+    ],
+    "legalGrounds": [
+      "12 C.F.R. § 1006.26 explicitly makes it illegal for collectors to sue or threaten litigation on expired debt",
+      "15 U.S.C. § 1692e prohibits deceptive threats of legal action on unenforceable claims"
+    ],
+    "sampleSnippet": "The debt referenced under Account #[Number] is past the applicable state statute of limitations. Under CFPB Regulation F, 12 C.F.R. § 1006.26, you cannot file or threaten litigation. I will make no payment on this expired claim. Close this account immediately and cease all communications.",
+    "faqs": [
+      {
+        "question": "Can an expired debt still stay on my credit report?",
+        "answer": "Under the FCRA (15 U.S.C. § 1681c), debts must be completely deleted from credit reports 7 years plus 180 days from the date of first delinquency, regardless of the lawsuit statute of limitations."
+      }
+    ]
+  }
 ];
 
 export function getDisputeGuide(slug: string): DisputeGuide | undefined {
