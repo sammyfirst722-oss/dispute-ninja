@@ -1055,13 +1055,7 @@ export function DisputeClient() {
         </div>
       </div>
 
-      {/* Trust & Legal Self-Advocacy Disclaimer */}
-      <div className="pt-6 border-t border-slate-900 text-center text-[10px] text-slate-500 space-y-2">
-        <p className="max-w-3xl mx-auto">
-          <strong>Important Legal & Compliance Notice:</strong> DisputeNinja is strictly a document generation and self-advocacy drafting tool. We do not provide credit repair services, debt settlement, or legal advice. No specific outcome is guaranteed. DisputeNinja AI is an educational technology platform to assist users representing themselves (pro-se) in administrative disputes. Use of this tool does not create an attorney-client relationship.
-        </p>
-        <p>© 2026 Sammy First LLC • All Rights Reserved</p>
-      </div>
+
     </div>
   )
 }

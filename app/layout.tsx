@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { EcosystemFooter } from '@/components/ecosystem-footer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-rose-500/30 selection:text-rose-200">
+      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-rose-500/30 selection:text-rose-200 flex flex-col">
         {/* 24/7 Consumer Legal Rights Hotline Banner */}
         <div className="bg-slate-900 border-b border-slate-800 text-slate-200 py-2 px-4 text-center text-xs sm:text-sm flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
           <span className="flex items-center gap-1.5 font-semibold text-emerald-400">
@@ -33,7 +34,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip media rage-bait. Get the zero-noise, high-signal smart cut on SimplyBigNews &rarr; <a href="https://plainnews.vercel.app" target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-2 hover:text-white transition-colors ml-1">Read SimplyBigNews &rarr;</a>
         </div>
 
-        {children}
+        <div className="flex-1 flex flex-col">
+          {children}
+        </div>
+
+        <EcosystemFooter />
       </body>
     </html>
   )
