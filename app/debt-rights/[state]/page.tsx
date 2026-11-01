@@ -36,9 +36,7 @@ export default async function StateDebtRightsPage({ params }: { params: Promise<
   const faqs = [
     main !== null && {
       question: `How long can a debt collector sue me in ${s.state}?`,
-      answer: `For most consumer debts in ${s.state} the time limit to file a lawsuit is ${yearsLabel(main)}${
-        s.solCitation ? ` (${s.solCitation})` : ''
-      }. The exact period depends on the type of debt, so check the table above.`,
+      answer: `For most consumer debts in ${s.state} the time limit to file a lawsuit is ${yearsLabel(main)}. The exact period depends on the type of debt, so check the table above.`,
     },
     {
       question: 'Does an old debt disappear from my credit report when the time limit ends?',
@@ -92,7 +90,8 @@ export default async function StateDebtRightsPage({ params }: { params: Promise<
               ))}
             </tbody>
           </table>
-          {s.solCitation && <p className="text-xs text-gray-400 mt-2">Statutes: {s.solCitation}</p>}
+          <p className="text-xs text-gray-400 mt-2">Periods shown are for ordinary consumer debt. Some debt types have different rules.</p>
+          {s.solCitation && <p className="text-xs text-gray-400 mt-1">Related statutes: {s.solCitation}</p>}
           <p className="text-xs text-gray-400 mt-1">
             Figures were cross-checked against Alper Law&apos;s 2026 state chart. Rows we could not confirm are left out. Laws change, so check your state&apos;s current statute.
           </p>

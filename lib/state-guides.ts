@@ -33,7 +33,7 @@ export function solRows(s: StateFacts): { label: string; years: number }[] {
     { label: 'Written contracts', years: s.solWrittenContractYears },
     { label: 'Oral contracts', years: s.solOralContractYears },
     { label: 'Promissory notes', years: s.solPromissoryNoteYears },
-    { label: 'Credit cards and other open accounts', years: s.solOpenAccountYears },
+    { label: 'Credit cards (revolving accounts)', years: s.solOpenAccountYears },
   ]
   return rows.filter((r): r is { label: string; years: number } => r.years !== null)
 }

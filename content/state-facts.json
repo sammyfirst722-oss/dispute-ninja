@@ -8,7 +8,7 @@
     "solOralContractYears": 6,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 3,
-    "solCitation": "Ala. Code §§ 6-2-34(4), (9), 6-2-37(1), 7-3-118(a); Ayers v. Cavalry SVP I, LLC, 876 So. 2d 474 (Ala. Civ. App. 2003)",
+    "solCitation": "Ala. Code §§ 6-2-34(4), (9), 6-2-37(1), 7-3-118(a)",
     "stateCollectionLaw": null
   },
   "AK": {
@@ -32,7 +32,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 6,
-    "solCitation": "Ariz. Rev. Stat. §§ 12-548(A)(1), (A)(2), 12-543(1), (2), 47-3118(A) (credit cards named in the six-year statute; a plain open or stated account is three)",
+    "solCitation": "Ariz. Rev. Stat. §§ 12-548(A)(1), (A)(2), 12-543(1), (2), 47-3118(A)",
     "stateCollectionLaw": null
   },
   "AR": {
@@ -44,7 +44,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": 5,
     "solOpenAccountYears": null,
-    "solCitation": "Ark. Code Ann. §§ 16-56-111(a), 16-56-105(1), (3), 4-3-118(a) (five years, a non-uniform adoption)",
+    "solCitation": "Ark. Code Ann. §§ 16-56-111(a), 16-56-105(1), (3), 4-3-118(a)",
     "stateCollectionLaw": null
   },
   "CA": {
@@ -68,7 +68,7 @@
     "solOralContractYears": 6,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 6,
-    "solCitation": "Colo. Rev. Stat. §§ 13-80-103.5(1)(a), 4-3-118(a) (six years for any liquidated debt, written or not)",
+    "solCitation": "Colo. Rev. Stat. §§ 13-80-103.5(1)(a), 4-3-118(a)",
     "stateCollectionLaw": null
   },
   "CT": {
@@ -80,7 +80,7 @@
     "solOralContractYears": null,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 6,
-    "solCitation": "Conn. Gen. Stat. §§ 52-576(a), 52-581(a), 42a-3-118(a); Tierney v. American Urban Corp., 170 Conn. 243 (1976) (three years reaches only an executory contract)",
+    "solCitation": "Conn. Gen. Stat. §§ 52-576(a), 52-581(a), 42a-3-118(a)",
     "stateCollectionLaw": null
   },
   "DE": {
@@ -104,7 +104,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": 3,
     "solOpenAccountYears": 3,
-    "solCitation": "D.C. Code §§ 28-3814(o), 12-301(7), 28:3-118(a) (six years on a note that is not consumer debt)",
+    "solCitation": "D.C. Code §§ 28-3814(o), 12-301(7), 28:3-118(a)",
     "stateCollectionLaw": null
   },
   "FL": {
@@ -116,7 +116,7 @@
     "solOralContractYears": 4,
     "solPromissoryNoteYears": 5,
     "solOpenAccountYears": 4,
-    "solCitation": "Fla. Stat. §§ 95.11(2)(b), 95.11(3)(j), 673.1181 (which sets no period of its own and sends the question to chapter 95)",
+    "solCitation": "Fla. Stat. §§ 95.11(2)(b), 95.11(3)(j), 673.1181",
     "stateCollectionLaw": "Florida Consumer Collection Practices Act"
   },
   "GA": {
@@ -128,7 +128,7 @@
     "solOralContractYears": 4,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 4,
-    "solCitation": "O.C.G.A. §§ 9-3-24, 9-3-25, 11-3-118(a); Hill v. American Express, 289 Ga. App. 576 (2008)",
+    "solCitation": "O.C.G.A. §§ 9-3-24, 9-3-25, 11-3-118(a)",
     "stateCollectionLaw": null
   },
   "HI": {
@@ -152,7 +152,7 @@
     "solOralContractYears": 4,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": null,
-    "solCitation": "Idaho Code §§ 5-216, 5-217, 28-3-118(1); Unifund CCR, LLC v. Lowe, 159 Idaho 750 (2016)",
+    "solCitation": "Idaho Code §§ 5-216, 5-217, 28-3-118(1)",
     "stateCollectionLaw": null
   },
   "IL": {
@@ -164,7 +164,7 @@
     "solOralContractYears": 5,
     "solPromissoryNoteYears": 10,
     "solOpenAccountYears": 5,
-    "solCitation": "735 ILCS 5/13-206 (ten years on notes, a non-uniform rule), 5/13-205; Portfolio Acquisitions, L.L.C. v. Feltman, 391 Ill. App. 3d 642 (2009)",
+    "solCitation": "735 ILCS 5/13-206, 5/13-205",
     "stateCollectionLaw": null
   },
   "IN": {
@@ -188,7 +188,7 @@
     "solOralContractYears": 5,
     "solPromissoryNoteYears": 10,
     "solOpenAccountYears": null,
-    "solCitation": "Iowa Code §§ 614.1(5)(a), 614.1(4); Iowa has no settled classification of a card account",
+    "solCitation": "Iowa Code §§ 614.1(5)(a), 614.1(4)",
     "stateCollectionLaw": null
   },
   "KS": {
@@ -200,7 +200,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": null,
-    "solCitation": "Kan. Stat. Ann. §§ 60-511(1), 60-512(1), 84-3-118(a); Kansas has no settled classification of a card account",
+    "solCitation": "Kan. Stat. Ann. §§ 60-511(1), 60-512(1), 84-3-118(a)",
     "stateCollectionLaw": null
   },
   "KY": {
@@ -212,7 +212,7 @@
     "solOralContractYears": 5,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 5,
-    "solCitation": "Ky. Rev. Stat. §§ 413.160, 413.120(1), 355.3-118(1); Fulk v. LVNV Funding LLC, 55 F. Supp. 3d 967 (E.D. Ky. 2014)",
+    "solCitation": "Ky. Rev. Stat. §§ 413.160, 413.120(1), 355.3-118(1)",
     "stateCollectionLaw": null
   },
   "LA": {
@@ -224,7 +224,7 @@
     "solOralContractYears": null,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": null,
-    "solCitation": "La. Civ. Code arts. 3494(3), (4), 3498 (liberative prescription, the civil law equivalent)",
+    "solCitation": "La. Civ. Code arts. 3494(3), (4), 3498",
     "stateCollectionLaw": null
   },
   "ME": {
@@ -308,7 +308,7 @@
     "solOralContractYears": 5,
     "solPromissoryNoteYears": 10,
     "solOpenAccountYears": null,
-    "solCitation": "Mo. Rev. Stat. §§ 516.110(1), 516.120(1), 400.3-118(a) (ten years, a non-uniform adoption); Capital One Bank v. Creed, 220 S.W.3d 874 (Mo. Ct. App. 2007)",
+    "solCitation": "Mo. Rev. Stat. §§ 516.110(1), 516.120(1), 400.3-118(a)",
     "stateCollectionLaw": null
   },
   "MT": {
@@ -332,7 +332,7 @@
     "solOralContractYears": 4,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 4,
-    "solCitation": "Neb. Rev. Stat. §§ 25-205(1), 25-206; Neb. U.C.C. § 3-118(a); the Nebraska Supreme Court has not classified a card account",
+    "solCitation": "Neb. Rev. Stat. §§ 25-205(1), 25-206; Neb. U.C.C. § 3-118(a)",
     "stateCollectionLaw": null
   },
   "NV": {
@@ -356,7 +356,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 3,
-    "solCitation": "N.H. Rev. Stat. §§ 508:4, I, 382-A:3-118(a); mortgage notes track the mortgage under 508:6",
+    "solCitation": "N.H. Rev. Stat. §§ 508:4, I, 382-A:3-118(a)",
     "stateCollectionLaw": null
   },
   "NJ": {
@@ -392,7 +392,7 @@
     "solOralContractYears": null,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 3,
-    "solCitation": "N.Y. C.P.L.R. §§ 214-i, 213(2) (consumer credit figures; six years outside consumer credit, and New York enacted no commercial code period for notes)",
+    "solCitation": "N.Y. C.P.L.R. §§ 214-i, 213(2)",
     "stateCollectionLaw": null
   },
   "NC": {
@@ -404,7 +404,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 3,
-    "solCitation": "N.C. Gen. Stat. §§ 1-52(1), 25-3-118(a), (h) (ten years on a sealed note)",
+    "solCitation": "N.C. Gen. Stat. §§ 1-52(1), 25-3-118(a), (h)",
     "stateCollectionLaw": null
   },
   "ND": {
@@ -425,10 +425,10 @@
     "verified": true,
     "reviewedOn": "2026-11-01",
     "solWrittenContractYears": 6,
-    "solOralContractYears": 4,
+    "solOralContractYears": null,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 6,
-    "solCitation": "Ohio Rev. Code §§ 2305.06, 2305.07(A), (C), 1303.16(A) (six years on any consumer debt, written or not; the four-year period reaches only non-consumer debt)",
+    "solCitation": "Ohio Rev. Code §§ 2305.06, 2305.07(A), (C), 1303.16(A)",
     "stateCollectionLaw": null
   },
   "OK": {
@@ -464,7 +464,7 @@
     "solOralContractYears": 4,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 4,
-    "solCitation": "42 Pa. Cons. Stat. §§ 5525(a)(3), (8), 5501(b), 5529(b)(1) (twenty years under seal); 13 Pa. Cons. Stat. § 3118(a)",
+    "solCitation": "42 Pa. Cons. Stat. §§ 5525(a)(3), (8), 5501(b), 5529(b)(1); 13 Pa. Cons. Stat. § 3118(a)",
     "stateCollectionLaw": null
   },
   "RI": {
@@ -488,7 +488,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 3,
-    "solCitation": "S.C. Code Ann. §§ 15-3-530(1), 15-3-520(a) (twenty years on a mortgage-secured note), 36-3-118(a)",
+    "solCitation": "S.C. Code Ann. §§ 15-3-530(1), 15-3-520(a), 36-3-118(a)",
     "stateCollectionLaw": null
   },
   "SD": {
@@ -512,7 +512,7 @@
     "solOralContractYears": 6,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 6,
-    "solCitation": "Tenn. Code Ann. §§ 28-3-109(a)(3) (ten years on a demand note under the same section), 47-3-118(a)",
+    "solCitation": "Tenn. Code Ann. §§ 28-3-109(a)(3), 47-3-118(a)",
     "stateCollectionLaw": null
   },
   "TX": {
@@ -536,7 +536,7 @@
     "solOralContractYears": 4,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": null,
-    "solCitation": "Utah Code §§ 78B-2-309(1)(b), (2), 78B-2-307(1), 70A-3-118(1); Asset Acceptance LLC v. Stocks, 2016 UT App 84",
+    "solCitation": "Utah Code §§ 78B-2-309(1)(b), (2), 78B-2-307(1), 70A-3-118(1)",
     "stateCollectionLaw": null
   },
   "VT": {
@@ -548,7 +548,7 @@
     "solOralContractYears": 6,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 6,
-    "solCitation": "12 V.S.A. §§ 511, 508 (fourteen years on a witnessed note); 9A V.S.A. § 3-118(a)",
+    "solCitation": "12 V.S.A. §§ 511, 508; 9A V.S.A. § 3-118(a)",
     "stateCollectionLaw": null
   },
   "VA": {
@@ -560,7 +560,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 3,
-    "solCitation": "Va. Code §§ 8.01-246(A)(2), (A)(4), 8.3A-118(a) (three years where the debtor never signed the writing)",
+    "solCitation": "Va. Code §§ 8.01-246(A)(2), (A)(4), 8.3A-118(a)",
     "stateCollectionLaw": null
   },
   "WA": {
@@ -572,7 +572,7 @@
     "solOralContractYears": 3,
     "solPromissoryNoteYears": 6,
     "solOpenAccountYears": 6,
-    "solCitation": "Rev. Code Wash. §§ 4.16.040(1), (2), 4.16.080(3), 62A.3-118(a) (six years on any account receivable)",
+    "solCitation": "Rev. Code Wash. §§ 4.16.040(1), (2), 4.16.080(3), 62A.3-118(a)",
     "stateCollectionLaw": null
   },
   "WV": {
@@ -584,7 +584,7 @@
     "solOralContractYears": 5,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": 5,
-    "solCitation": "W. Va. Code §§ 55-2-6, 46-3-118(a) (five years, a non-uniform adoption)",
+    "solCitation": "W. Va. Code §§ 55-2-6, 46-3-118(a)",
     "stateCollectionLaw": null
   },
   "WI": {
@@ -608,7 +608,7 @@
     "solOralContractYears": null,
     "solPromissoryNoteYears": null,
     "solOpenAccountYears": null,
-    "solCitation": "Wyo. Stat. §§ 1-3-105(a)(i), (a)(ii)(A), 34.1-3-118(a) Each figure is the state's general rule for that form of debt. A few kinds of notes run longer. Pennsylvania gives an instrument under seal twenty years. South Carolina gives twenty years to a note secured by a mortgage, and New Hampshire ties a mortgage note to the life of the mortgage itself. Vermont allows fourteen years on a note signed be",
+    "solCitation": "Wyo. Stat. §§ 1-3-105(a)(i), (a)(ii)(A), 34.1-3-118(a) Each figure is the state's general rule for that form of debt. A few kinds of notes run longer. Pennsylvania gives an instrument under seal twenty years. South Carolina gives twenty years to a note secured by a mortgage, and New Hampshire ties a mortgage note to the life of the mortgage itself. Vermont allows fourteen years on a note signed before an attesting witness. The promissory note column is the period for an ordinary note due on a set date. A note payable on demand runs six years from the demand in most states. In those states, if the holder never demands payment, the note is barred once ten years pass with no payment of principal or interest. What Is the Statute of Limitations on Credit Card Debt? Credit card debt is subject to a three- to six-year statute of limitations in most states. States disagree about what a credit card balance is: some courts read the cardholder agreement as a written contract, others treat the balance as an open account, and several states have never decided.",
     "stateCollectionLaw": null
   }
 }
