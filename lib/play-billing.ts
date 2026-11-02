@@ -63,33 +63,32 @@ export async function purchaseWithPlayBilling(
     const request = new PaymentRequest(paymentMethods, paymentDetails)
     const paymentResponse = await request.show()
     const details = paymentResponse.details || {}
-    const purchaseToken = details.purchaseToken || details.token || 'twa_play_token_' + Date.now()
+    const purchaseToken = details.purchaseToken || details.token
+    if (!purchaseToken || typeof purchaseToken !== 'string') {
+      // No real token from Google Play: never invent one.
+      await paymentResponse.complete('fail')
+      return { success: false, error: 'Google Play did not return a purchase token.' }
+    }
 
-    // Call server verification & acknowledgement
+    // Our server asks Google Play whether this purchase is real, and acknowledges it.
     try {
       const verifyRes = await fetch('/api/play-billing/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sku,
-          purchaseToken,
-          packageName: 'app.vercel.disputeninja.twa',
-        }),
+        body: JSON.stringify({ sku, purchaseToken }),
       })
-
-      const verifyData = await verifyRes.json()
+      const verifyData = await verifyRes.json().catch(() => ({}))
 
       if (verifyRes.ok && verifyData.verified) {
         await paymentResponse.complete('success')
         return { success: true, purchaseToken }
-      } else {
-        await paymentResponse.complete('fail')
-        return { success: false, error: verifyData.message || 'Payment verification failed' }
       }
-    } catch (verifyErr) {
-      // In case server route is temporarily offline, acknowledge to protect customer
-      await paymentResponse.complete('success')
-      return { success: true, purchaseToken }
+      await paymentResponse.complete('fail')
+      return { success: false, error: 'We could not confirm your purchase. If you were charged, Google Play refunds it automatically.' }
+    } catch {
+      // Could not reach our server: do NOT unlock. An unconfirmed purchase is refunded by Google automatically.
+      await paymentResponse.complete('fail')
+      return { success: false, error: 'We could not confirm your purchase. If you were charged, Google Play refunds it automatically.' }
     }
   } catch (err: any) {
     console.error('Play Billing Purchase Error:', err)

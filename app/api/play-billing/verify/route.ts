@@ -1,31 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyPlayPurchase } from '@/lib/payments'
 
+// Checks a Google Play purchase with Google itself, then acknowledges it.
+// (Google automatically refunds purchases that are not acknowledged within about 3 days.)
 export async function POST(req: NextRequest) {
   try {
-    const { sku, purchaseToken, packageName } = await req.json().catch(() => ({}))
-
-    if (!purchaseToken) {
-      return NextResponse.json(
-        { verified: false, message: 'Missing purchase token' },
-        { status: 400 }
-      )
+    const { sku, purchaseToken } = await req.json().catch(() => ({}))
+    const result = await verifyPlayPurchase(sku, purchaseToken, { acknowledge: true })
+    if (!result.ok) {
+      return NextResponse.json({ verified: false, message: result.reason }, { status: result.status })
     }
-
-    // Google Play Billing token received from TWA Digital Goods API
-    // On production with Play API service account, token can be verified with androidpublisher
-    console.log(`[Google Play Billing] Verified purchase for SKU: ${sku}, App: ${packageName}`)
-
-    return NextResponse.json({
-      verified: true,
-      sku: sku || 'disputeninja_letter',
-      status: 'acknowledged',
-      timestamp: new Date().toISOString(),
-    })
-  } catch (err: any) {
+    return NextResponse.json({ verified: true, product: result.product, status: 'acknowledged' })
+  } catch (err) {
     console.error('Play billing verify error:', err)
-    return NextResponse.json(
-      { verified: false, message: err.message || 'Verification failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ verified: false, message: 'verification_failed' }, { status: 500 })
   }
 }

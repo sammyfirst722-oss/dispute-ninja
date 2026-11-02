@@ -23,8 +23,6 @@ import {
   Scale,
   Mail,
   Send,
-  Truck,
-  Printer,
   Smartphone,
   MapPin,
   Globe,
@@ -160,14 +158,67 @@ export function DisputeClient() {
   // Bureau direct copy feedback
   const [copiedBureau, setCopiedBureau] = useState<string | null>(null)
 
-  // Certified Mail State
-  const [showMailModal, setShowMailModal] = useState(false)
-  const [mailSenderName, setMailSenderName] = useState('')
-  const [mailSenderAddress, setMailSenderAddress] = useState('')
-  const [mailRecipientName, setMailRecipientName] = useState('')
-  const [mailRecipientAddress, setMailRecipientAddress] = useState('')
-  const [isMailed, setIsMailed] = useState(false)
-  const [uspsTrackingNumber, setUspsTrackingNumber] = useState('9407 1118 9956 2200 4819 12')
+  // Proof of payment, kept in memory so later requests can be re-checked by the server
+  const [paidSessionId, setPaidSessionId] = useState<string | null>(null)
+  const [playPurchase, setPlayPurchase] = useState<{ sku: string; purchaseToken: string } | null>(null)
+  const [unlockError, setUnlockError] = useState('')
+
+  const entitlementPayload = (): Record<string, unknown> =>
+    paidSessionId ? { sessionId: paidSessionId } : playPurchase ? { playPurchase } : {}
+
+  // Ask the server for the letter. It only answers if Stripe or Google Play confirm the payment.
+  const loadLetter = async (
+    entitlement: Record<string, unknown>,
+    fields: { disputeType: string; creditorName: string; disputedAmount: string; userName?: string; lang: string }
+  ): Promise<boolean> => {
+    const es = fields.lang === 'es'
+    try {
+      const r = await fetch('/api/generate-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...fields, ...entitlement }),
+      })
+      const d = await r.json().catch(() => ({}))
+      if (r.ok && d.letter) {
+        setFullLetter(d.letter)
+        setIsUnlocked(true)
+        setUnlockError('')
+        return true
+      }
+      setUnlockError(
+        r.status === 402
+          ? (es ? 'No pudimos confirmar su pago. Si ya pagó, escríbanos y lo resolvemos.' : 'We could not confirm your payment. If you already paid, please contact us and we will fix it.')
+          : (es ? 'No se pudo cargar su carta. Intente de nuevo.' : 'Your letter could not be loaded. Please try again.')
+      )
+    } catch {
+      setUnlockError(es ? 'No se pudo cargar su carta. Intente de nuevo.' : 'Your letter could not be loaded. Please try again.')
+    }
+    return false
+  }
+
+  // Kit bought through Google Play: the server checks the purchase, then sends the file.
+  const downloadKit = async (purchase: { sku: string; purchaseToken: string }) => {
+    try {
+      const r = await fetch('/api/kit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playPurchase: purchase }),
+      })
+      if (!r.ok) throw new Error('kit')
+      const blob = await r.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'debt-dispute-action-kit.zip'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      setUnlockError(lang === 'es' ? 'No se pudo descargar el paquete. Intente de nuevo.' : 'The kit could not be downloaded. Please try again.')
+    }
+  }
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -184,41 +235,21 @@ export function DisputeClient() {
         } catch {}
       }
 
-      if (params.get('unlocked') === 'kit') {
-        window.location.href = '/downloads/debt-dispute-action-kit.zip'
+      const sessionId = params.get('session_id')
+      if (params.get('unlocked') === 'kit' && sessionId) {
+        // Kit download: the server checks payment before it sends the file.
+        window.location.href = `/api/kit?session_id=${encodeURIComponent(sessionId)}`
       }
-      if (params.get('unlocked') === 'mail') {
-        setIsUnlocked(true)
-        setIsMailed(true)
-        const cred = params.get('creditor') || 'Creditor'
-        setCreditorName(cred)
-      }
-      if (params.get('unlocked') === 'true') {
-        setIsUnlocked(true)
+      if (params.get('unlocked') === 'true' && sessionId) {
         const type = (params.get('type') || 'debt') as DisputeCategory
         const cred = params.get('creditor') || 'Creditor'
         const amt = params.get('amount') || '500'
         setDisputeType(type)
         setCreditorName(cred)
         setDisputedAmount(amt)
-
-        // Fetch full letter
-        fetch('/api/generate-letter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            disputeType: type,
-            creditorName: cred,
-            disputedAmount: amt,
-            userName: 'Valued Consumer',
-            lang: urlLang || 'en'
-          }),
-        })
-          .then((r) => r.json())
-          .then((d) => {
-            if (d.letter) setFullLetter(d.letter)
-          })
-          .catch(console.error)
+        setPaidSessionId(sessionId)
+        // Unlocks only if the server confirms with Stripe that this session was paid.
+        loadLetter({ sessionId }, { disputeType: type, creditorName: cred, disputedAmount: amt, userName: 'Valued Consumer', lang: urlLang || 'en' })
       }
     }
   }, [])
@@ -229,23 +260,8 @@ export function DisputeClient() {
       localStorage.setItem('disputeninja-lang', newLang)
     } catch {}
     if (isUnlocked) {
-      // Re-fetch in the newly selected language
-      fetch('/api/generate-letter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          disputeType,
-          creditorName,
-          disputedAmount,
-          userName: userName || 'Consumer',
-          lang: newLang
-        }),
-      })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.letter) setFullLetter(d.letter)
-        })
-        .catch(console.error)
+      // Re-fetch in the newly selected language (the server re-checks payment)
+      loadLetter(entitlementPayload(), { disputeType, creditorName, disputedAmount, userName: userName || 'Consumer', lang: newLang })
     }
   }
 
@@ -361,68 +377,50 @@ export function DisputeClient() {
     }
   }
 
-  const handleUnlock = async (productType: 'letter' | 'kit' | 'mail' = 'letter') => {
+  const handleUnlock = async (productType: 'letter' | 'kit' = 'letter') => {
     setIsCheckingOut(true)
+    setUnlockError('')
     try {
-      // 1. Google Play In-App Billing for Android TWA
+      // 1. Google Play In-App Billing for the Android app
       if (isPlayBillingAvailable()) {
-        const sku = productType === 'kit' ? 'disputeninja_kit' : productType === 'mail' ? 'disputeninja_mail' : 'disputeninja_letter'
-        const price = productType === 'kit' ? '19.00' : productType === 'mail' ? '14.99' : '9.99'
-        const label = productType === 'kit' 
+        const sku = productType === 'kit' ? 'disputeninja_kit' : 'disputeninja_letter'
+        const price = productType === 'kit' ? '19.00' : '9.99'
+        const label = productType === 'kit'
           ? (lang === 'es' ? 'Paquete Completo de Disputa' : 'Dispute Action Kit')
-          : productType === 'mail' 
-          ? (lang === 'es' ? 'Servicio Correo Certificado USPS' : 'USPS Certified Mail Service')
           : (lang === 'es' ? 'Carta Formal de Demanda Legal' : 'Dispute Demand Letter')
 
         const playResult = await purchaseWithPlayBilling(sku, price, label)
-        if (playResult.success) {
-          setIsUnlocked(true)
-          if (productType === 'mail') {
-            setIsMailed(true)
+        if (playResult.success && playResult.purchaseToken) {
+          const purchase = { sku, purchaseToken: playResult.purchaseToken }
+          setPlayPurchase(purchase)
+          if (productType === 'kit') {
+            await downloadKit(purchase)
+          } else {
+            await loadLetter({ playPurchase: purchase }, { disputeType, creditorName, disputedAmount, userName: userName || 'Valued Consumer', lang })
           }
-          // Fetch letter with active language
-          fetch('/api/generate-letter', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              disputeType,
-              creditorName,
-              disputedAmount,
-              userName: userName || 'Valued Consumer',
-              lang
-            }),
-          })
-            .then((r) => r.json())
-            .then((d) => {
-              if (d.letter) setFullLetter(d.letter)
-            })
-          setIsCheckingOut(false)
-          return
+        } else {
+          setUnlockError(playResult.error || (lang === 'es' ? 'No se completó la compra.' : 'The purchase was not completed.'))
         }
+        setIsCheckingOut(false)
+        return
       }
 
-      // 2. Stripe Web Checkout fallback
+      // 2. Stripe web checkout
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          disputeType,
-          creditorName,
-          disputedAmount,
-          productType,
-          isTwa: isAndroidApp(),
-          recipientAddress: mailRecipientAddress,
-          senderAddress: mailSenderAddress,
-        }),
+        body: JSON.stringify({ disputeType, creditorName, disputedAmount, productType, isTwa: isAndroidApp() }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl
       } else {
+        setUnlockError(data.error || (lang === 'es' ? 'No se pudo iniciar el pago. Intente de nuevo.' : 'Checkout could not start. Please try again.'))
         setIsCheckingOut(false)
       }
     } catch (err) {
       console.error(err)
+      setUnlockError(lang === 'es' ? 'No se pudo iniciar el pago. Intente de nuevo.' : 'Checkout could not start. Please try again.')
       setIsCheckingOut(false)
     }
   }
@@ -731,15 +729,10 @@ export function DisputeClient() {
                     <AlertTriangle className="w-4 h-4 text-rose-400" />
                     <span>
                       {lang === 'es'
-                        ? `Auditoría Completa: ${analysisResult.violations?.length || 0} Infracciones Legales Identificadas`
-                        : `Audit Complete: ${analysisResult.violations?.length || 0} Actionable Violations Identified`}
+                        ? `Lista de Revisión: ${analysisResult.violations?.length || 0} Puntos para Revisar`
+                        : `Checklist: ${analysisResult.violations?.length || 0} Things Worth Checking`}
                     </span>
                   </div>
-                  {analysisResult.estimatedSavings && (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs">
-                      <span>{lang === 'es' ? 'Alivio Potencial:' : 'Potential Relief / Savings:'} {analysisResult.estimatedSavings}</span>
-                    </div>
-                  )}
                 </div>
                 <p className="text-slate-300">{analysisResult.summary}</p>
                 <div className="pt-1 flex flex-wrap gap-2">
@@ -754,8 +747,8 @@ export function DisputeClient() {
                   <Clock className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>
                     {lang === 'es'
-                      ? 'Aviso Legal: El plazo fatal de respuesta de 30 días inicia en cuanto USPS entregue el correo certificado.'
-                      : 'Statutory Notice: Federal 30-day response clock begins the moment certified delivery is logged by USPS.'}
+                      ? 'Recordatorio: muchos plazos de disputa son cortos. Revise las fechas de su aviso.'
+                      : 'Reminder: many dispute deadlines are short. Check the dates on your notice.'}
                   </span>
                 </div>
               </div>
@@ -776,8 +769,8 @@ export function DisputeClient() {
                     </h3>
                     <p className="text-xs text-slate-400 max-w-md mt-1">
                       {lang === 'es'
-                        ? 'Incluye citas estatutarias para correo certificado, plazo de 30 días, cláusulas de escalamiento ante el CFPB y guía de envío.'
-                        : 'Includes certified mail statutory citations, 30-day estoppel clock demand, CFPB escalation clauses, and step-by-step USPS mailing guide.'}
+                        ? 'Su carta completa con citas legales, redactada para su situación y lista para copiar, imprimir y enviar.'
+                        : 'Your complete letter with legal citations, written for your situation, ready to copy, print and mail.'}
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg justify-center">
@@ -794,19 +787,15 @@ export function DisputeClient() {
                       </span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      onClick={() => setShowMailModal(true)}
-                      className="flex-1 px-5 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                    >
-                      <Truck className="w-3.5 h-3.5" />
-                      <span>{lang === 'es' ? 'La Enviamos por Correo Certificado • $14.99' : 'We Mail For You (USPS Certified) • $14.99'}</span>
-                    </button>
                   </div>
                   <span className="text-[11px] text-slate-500">
                     {hasPlayBilling
                       ? (lang === 'es' ? '🔒 Protección de Compra Integrada de Google Play' : '🔒 Google Play In-App Purchase Protection')
-                      : (lang === 'es' ? 'Acceso Instantáneo • 100% Garantía de Reembolso • Seguro vía Stripe' : 'Instant Access • 100% Money-Back Guarantee • Secured by Stripe')}
+                      : (lang === 'es' ? 'Acceso Instantáneo • Seguro vía Stripe' : 'Instant Access • Secured by Stripe')}
                   </span>
+                  {unlockError && (
+                    <p role="alert" className="text-xs font-semibold text-rose-300">{unlockError}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -823,7 +812,7 @@ export function DisputeClient() {
                   {lang === 'es' ? 'Su Carta de Disputa está Desbloqueada y Lista' : 'Your Dispute Letter is Unlocked & Ready to Mail'}
                 </h2>
                 <span className="text-xs text-emerald-300">
-                  {lang === 'es' ? 'Formato estatutario para Correo Certificado USPS activo' : 'Statutory certified mail format active'}
+                  {lang === 'es' ? 'Lista para copiar, imprimir y enviar usted mismo por correo certificado' : 'Ready to copy, print and send by certified mail yourself'}
                 </span>
               </div>
             </div>
@@ -844,60 +833,6 @@ export function DisputeClient() {
             {fullLetter || (lang === 'es' ? 'Cargando su carta personalizada...' : 'Loading your customized letter...')}
           </div>
 
-          {/* Certified Mail Dispatch Status */}
-          {isMailed ? (
-            <div className="p-5 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 text-xs text-emerald-200 space-y-2.5">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                <Truck className="w-4 h-4" />
-                <span>
-                  {lang === 'es' ? '¡Correo Certificado USPS Primera Clase Despachado!' : 'USPS First-Class Certified Mail Dispatched!'}
-                </span>
-              </div>
-              <p>
-                {lang === 'es'
-                  ? `Su paquete de disputa está programado para impresión física y despacho certificado a ${creditorName || 'el acreedor'}.`
-                  : `Your dispute package is scheduled for print and certified dispatch to ${creditorName || 'the creditor'}.`}
-              </p>
-              <div className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/30 font-mono text-xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">
-                    {lang === 'es' ? 'Número de Rastreo USPS (Certificado con Acuse Verde)' : 'USPS Tracking Number (Certified with Return Receipt)'}
-                  </span>
-                  <span className="text-white font-bold">{uspsTrackingNumber}</span>
-                </div>
-                <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                  {lang === 'es' ? 'Tránsito: 2-3 Días' : 'Transit: 2-3 Days'}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950 border-2 border-amber-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase">
-                  <Printer className="w-4 h-4" />
-                  <span>
-                    {lang === 'es' ? '¿No Quiere Ir a la Oficina Postal de USPS?' : "Don't Want to Go to the Post Office?"}
-                  </span>
-                </div>
-                <h4 className="text-sm font-extrabold text-white">
-                  {lang === 'es'
-                    ? 'Nosotros Imprimimos y Enviamos su Carta por Correo Certificado'
-                    : 'We Will Print & Mail This via USPS Certified Mail For You'}
-                </h4>
-                <p className="text-xs text-slate-400">
-                  {lang === 'es'
-                    ? 'Incluye tarjeta verde oficial de acuse de recibo y número de rastreo despachado en 24 horas hábiles.'
-                    : 'Includes legal green-card return receipt and USPS tracking number dispatched within 24 business hours.'}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowMailModal(true)}
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shrink-0 transition-all shadow-lg active:scale-95"
-              >
-                {lang === 'es' ? 'Enviar por Correo Certificado • $14.99' : 'Send via Certified Mail • $14.99'}
-              </button>
-            </div>
-          )}
         </div>
       )}
 
@@ -959,99 +894,6 @@ export function DisputeClient() {
         </div>
       </div>
 
-      {/* WE PRINT & MAIL FOR YOU MODAL / DRAWER */}
-      {showMailModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-amber-400 font-black text-lg">
-                <Truck className="w-5 h-5" />
-                <span>
-                  {lang === 'es' ? 'Servicio de Despacho Correo Certificado USPS' : 'USPS Certified Mail Dispatch Service'}
-                </span>
-              </div>
-              <button
-                onClick={() => setShowMailModal(false)}
-                className="text-slate-400 hover:text-white text-sm font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-300">
-              {lang === 'es'
-                ? 'Imprimimos físicamente su carta de disputa en papel bond de alta calidad, la sellamos en sobre oficial, agregamos el código de barras certificado de USPS con acuse verde y la entregamos al cartero postal en 24 horas.'
-                : 'We physically print your dispute letter on official bond paper, fold and seal it in an envelope, slap on an official USPS Certified Mail barcode with Return Receipt, and hand it to a postal carrier within 24 hours.'}
-            </p>
-
-            <div className="space-y-3 text-left">
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                  {lang === 'es' ? 'Dirección Postal del Acreedor / Cobrador' : 'Recipient / Creditor Mailing Address'}
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Midland Credit Management, PO Box 939069, San Diego, CA 92193"
-                  value={mailRecipientAddress}
-                  onChange={(e) => setMailRecipientAddress(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                  {lang === 'es' ? 'Su Dirección Postal de Retorno (Para Respuesta y Verificación)' : 'Your Return Mailing Address (For Response & Verification)'}
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 123 Main St, Apt 4B, Austin, TX 78701"
-                  value={mailSenderAddress}
-                  onChange={(e) => setMailSenderAddress(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 space-y-1">
-              <div className="flex justify-between font-bold text-white">
-                <span>{lang === 'es' ? 'Impresión y Envío Certificado Primera Clase USPS:' : 'USPS First-Class Certified Print & Post:'}</span>
-                <span>$14.99</span>
-              </div>
-              <span className="text-slate-500 text-[10px] block">
-                {lang === 'es'
-                  ? 'Incluye impresión, sobre, acuse de recibo verde, código de barras de rastreo y entrega postal.'
-                  : 'Includes printing, envelope, green card return receipt, tracking barcode, and postal handling.'}
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowMailModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
-              >
-                {lang === 'es' ? 'Cancelar' : 'Cancel'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowMailModal(false)
-                  handleUnlock('mail')
-                }}
-                disabled={isCheckingOut}
-                className="flex-2 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 flex items-center justify-center gap-1.5"
-              >
-                <Truck className="w-3.5 h-3.5" />
-                <span>
-                  {hasPlayBilling
-                    ? (lang === 'es' ? '1-Toque Google Play • $14.99' : '1-Tap Google Play • $14.99')
-                    : (lang === 'es' ? 'Despachar Correo Certificado • $14.99' : 'Dispatch via USPS Certified • $14.99')}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* TRANSPARENT PRICING & INSTANT CHECKOUT SECTION */}
       <div id="pricing" className="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 sm:p-8 space-y-6">
@@ -1065,12 +907,12 @@ export function DisputeClient() {
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
             {lang === 'es'
-              ? 'Pago único de 1 vez. Descarga instantánea. 100% garantía de reembolso si no auditan o pausan el cobro.'
-              : '1-time payment. Instant download. 100% money-back guarantee if the biller does not pause or audit their charges.'}
+              ? 'Pago único de 1 vez. Acceso instantáneo. Sin suscripciones.'
+              : '1-time payment. Instant access. No subscriptions.'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {/* Card 1: Single Letter */}
           <div className="p-6 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
@@ -1095,11 +937,7 @@ export function DisputeClient() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{lang === 'es' ? 'Cláusula obligatoria de congelamiento de 30 días' : 'Mandatory 30-Day Estoppel freeze clause'}</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{lang === 'es' ? 'Instrucciones paso a paso de envío por correo' : 'Step-by-step USPS Certified Mail instructions'}</span>
+                  <span>{lang === 'es' ? 'Redactada para su situación, lista para copiar, imprimir y enviar' : 'Written for your situation, ready to copy, print and mail'}</span>
                 </li>
               </ul>
             </div>
@@ -1118,51 +956,6 @@ export function DisputeClient() {
             </button>
           </div>
 
-          {/* Card 2: USPS Certified Print & Mail */}
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-amber-950/40 via-slate-950 to-slate-950 border-2 border-amber-500/50 flex flex-col justify-between space-y-4 relative shadow-xl shadow-amber-950/30">
-            <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-              {lang === 'es' ? 'Nosotros Enviamos' : 'We Mail For You'}
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-base font-extrabold text-white">USPS Certified Mail</h4>
-                  <p className="text-xs text-amber-300">
-                    {lang === 'es' ? 'Impresa y Despachada con Rastreo' : 'Printed & Dispatched with Tracking'}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-2xl font-black text-amber-400">$14.99</span>
-                  <span className="text-[10px] text-slate-500 block">{lang === 'es' ? 'pago único' : 'one-time'}</span>
-                </div>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-2 pt-2 border-t border-slate-800/80">
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>{lang === 'es' ? 'Incluye Carta Formal de Demanda' : 'Includes Single Formal Demand Letter'}</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>{lang === 'es' ? 'Impresa en papel bond de alta calidad' : 'Printed on high-grade archival bond paper'}</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>{lang === 'es' ? 'Código de barras USPS + Acuse verde' : 'USPS Certified barcode + Return Receipt'}</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>{lang === 'es' ? 'Sin necesidad de ir a la oficina postal' : 'Zero post office trip needed'}</span>
-                </li>
-              </ul>
-            </div>
-            <button
-              onClick={() => setShowMailModal(true)}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-            >
-              <Truck className="w-3.5 h-3.5" />
-              <span>{lang === 'es' ? 'Nosotros Imprimimos y Enviamos • $14.99' : 'We Print & Mail • $14.99'}</span>
-            </button>
-          </div>
 
           {/* Card 3: Complete 5-Letter Kit */}
           <div className="p-6 rounded-2xl bg-gradient-to-b from-emerald-950/40 via-slate-950 to-slate-950 border-2 border-emerald-500/50 flex flex-col justify-between space-y-4 relative shadow-xl shadow-emerald-950/30">
@@ -1187,19 +980,23 @@ export function DisputeClient() {
               <ul className="text-xs text-slate-300 space-y-2 pt-2 border-t border-slate-800/80">
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{lang === 'es' ? '1. Validación de Deuda de 30 Días' : '1. Debt Collector 30-Day Validation'}</span>
+                  <span>{lang === 'es' ? '1. Solicitud de Factura Médica Detallada' : '1. Medical Bill Itemized Audit Request'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{lang === 'es' ? '2. Auditoría Desglosada de Factura Médica' : '2. Hospital Itemized Billing Audit'}</span>
+                  <span>{lang === 'es' ? '2. Carta de Disputa (Ley No Surprises)' : '2. No Surprises Act Dispute Letter'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{lang === 'es' ? '3. Demanda de Cese de Acoso Telefónico' : '3. Cease & Desist Harassment Demand'}</span>
+                  <span>{lang === 'es' ? '3. Validación de Deuda (FDCPA)' : '3. Debt Collector Validation Demand (FDCPA)'}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{lang === 'es' ? '4. Demanda de Eliminación en Burós (FCRA)' : '4. Credit Bureau Deletion Demand (FCRA)'}</span>
+                  <span>{lang === 'es' ? '4. Reclamo de Depósito de Garantía' : '4. Landlord Security Deposit Demand'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>{lang === 'es' ? '5. Aviso de Investigación al Buró (FCRA)' : '5. Credit Bureau Investigation Notice (FCRA)'}</span>
                 </li>
               </ul>
             </div>
@@ -1223,10 +1020,13 @@ export function DisputeClient() {
           <Lock className="w-3 h-3 text-emerald-400" />
           <span>
             {hasPlayBilling
-              ? (lang === 'es' ? 'Protección Google Play In-App • Descarga Instantánea • 100% Garantizado' : 'Google Play In-App Purchase Protection • Instant Download • 100% Guaranteed')
-              : (lang === 'es' ? 'Seguro vía Stripe SSL 256-Bit • Descarga Inmediata • 100% Garantía de Reembolso' : 'Secured by Stripe 256-Bit SSL • Instant PDF/Text Download • 100% Money-Back Guarantee')}
+              ? (lang === 'es' ? 'Protección Google Play In-App • Acceso Instantáneo' : 'Google Play In-App Purchase Protection • Instant Access')
+              : (lang === 'es' ? 'Seguro vía Stripe SSL 256-Bit • Acceso Inmediato' : 'Secured by Stripe 256-Bit SSL • Instant Access')}
           </span>
         </div>
+        {unlockError && (
+          <p role="alert" className="text-center text-xs font-semibold text-rose-300">{unlockError}</p>
+        )}
       </div>
 
       {/* "WHY DOES THIS WORK?" CONVINCING EVIDENCE SECTION */}

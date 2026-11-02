@@ -29,6 +29,10 @@ export function EcosystemFooter() {
               Privacy Policy
             </Link>
             <span className="text-slate-700">•</span>
+            <Link href="/terms" className="hover:text-emerald-400 hover:underline transition-colors">
+              Terms
+            </Link>
+            <span className="text-slate-700">•</span>
             <a
               href="tel:5203571814"
               className="hover:text-emerald-400 hover:underline transition-colors"

@@ -31,6 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...(states.length > 0
       ? [{ url: `${baseUrl}/debt-rights`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 }]
       : []),
+    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'yearly' as const, priority: 0.3 },
     ...disputeUrls,
     ...stateUrls,
   ]

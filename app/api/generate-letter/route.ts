@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cleanAmount, cleanText, entitlementFromBody } from '@/lib/payments'
 
 export async function POST(req: NextRequest) {
   try {
-    const {
-      disputeType,
-      creditorName,
-      disputedAmount,
-      userName = 'Consumer',
-      accountNum = 'PENDING-001',
-      lang = 'en'
-    } = await req.json()
+    const body = await req.json().catch(() => null)
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+    }
+
+    // PAYMENT CHECK: the letter is only returned if Stripe says the session is paid,
+    // or Google Play confirms the purchase. (Before 2026-11-02 this route was open to everyone.)
+    const ent = await entitlementFromBody(body)
+    if (!ent.ok) {
+      return NextResponse.json({ error: 'payment_required', reason: ent.reason }, { status: ent.status })
+    }
+
+    const disputeType = cleanText(body.disputeType, 20, 'other')
+    const creditorName = cleanText(body.creditorName, 120)
+    const disputedAmount = cleanAmount(body.disputedAmount, '')
+    const userName = cleanText(body.userName, 120, 'Consumer')
+    const accountNum = cleanText(body.accountNum, 60, 'PENDING-001')
+    const lang = body.lang === 'es' ? 'es' : 'en'
 
     const isSpanish = lang === 'es'
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -92,7 +103,7 @@ MANDATORY VALIDATION DOCUMENTS DEMANDED:
 NOTICE OF TELEPHONE COMMUNICATIONS CEASE:
 Pursuant to 15 U.S.C. § 1692c(c), do not contact me by telephone at my home, mobile, or place of employment. All future communications regarding this matter must be conducted strictly in writing via US Postal Service.
 
-Failure to provide statutory validation within 30 days requires the immediate closure of this file and deletion of any derogatory remarks reported to Equifax, Experian, or TransUnion.
+Until you mail me verification of this debt, 15 U.S.C. § 1692g(b) requires you to cease collection of it. You also may not report this debt to any credit bureau without noting that it is disputed (15 U.S.C. § 1692e(8)).
 
 Sincerely,
 
@@ -110,11 +121,11 @@ Esta carta legal está redactada en inglés formal conforme a la Ley Federal FDC
 1. Cese inmediato de llamadas telefónicas: Bajo la Sección 1692c(c), se les prohíbe llamarlo a su teléfono celular, casa o trabajo.
 2. Validación legal obligatoria: Exige copia del contrato original firmado por usted y el cálculo detallado de cómo calcularon los $${disputedAmount || '0.00'}.
 3. Prueba de propiedad de la deuda: Si compraron la deuda a un banco o tercero, deben demostrar la cadena de custodia legal.
-4. Si no validan en 30 días: Por ley federal deben cerrar el archivo y eliminar todo reporte negativo en Experian, Equifax y TransUnion.
+4. Hasta que envíen la verificación: la ley federal (15 U.S.C. § 1692g(b)) les exige suspender el cobro, y no pueden reportar la deuda a los burós de crédito sin indicar que está en disputa (15 U.S.C. § 1692e(8)).
 
 📬 INSTRUCCIONES DE ENVÍO:
 - Envíela por Correo Certificado USPS con acuse de recibo.
-- Si continúan llamándole después de recibir la carta, registre fecha y hora: cada llamada viola la ley federal con penalidades de hasta $1,000 por infracción.
+- Si continúan llamándole después de recibir la carta, anote la fecha y hora de cada llamada. Puede ser prueba de una violación de la ley; consulte a un abogado o a una organización de ayuda legal sobre sus opciones.
 ================================================================================\n\n`
     } else if (disputeType === 'credit') {
       letterBody = `CERTIFIED MAIL - RETURN RECEIPT REQUESTED
@@ -179,7 +190,7 @@ Please accept this letter as formal demand for the full return of my security de
 The deductions withheld from my security deposit are unlawful and disputed for the following reasons:
 1. Normal Wear and Tear: Under state landlord-tenant statutes, landlords may not deduct funds for normal wear and tear resulting from ordinary habitation.
 2. Failure of Timely Written Itemization: Landlords are statutorily required to deliver an itemized list of damages accompanied by authentic contractor receipts or invoices within the statutory deadline.
-3. Bad Faith Penalty: Failure to adhere to these statutory deadlines constitutes bad faith withholding under state law, exposing the landlord to statutory damages of up to 2x to 3x the deposit amount plus attorney fees in small claims court.
+3. Bad Faith Penalty: Failure to adhere to these statutory deadlines constitutes bad faith withholding under state law, which in some states exposes the landlord to extra statutory damages (in some states up to 2x or 3x the deposit) plus court costs.
 
 DEMAND:
 Please issue a cashier's check or digital payment for $${disputedAmount || '0.00'} within ten (10) calendar days of receipt of this notice. If full payment is not received within this period, I will immediately file an action in Small Claims Court for statutory damages, court costs, and interest.
@@ -199,7 +210,7 @@ Esta carta legal exige formalmente a su arrendador o compañía de administraci�
 📌 ¿QUÉ EXIGE ESTA CARTA A SU ARRENDADOR?
 1. Devolución de $${disputedAmount || '0.00'}: Exige el reembolso de las deducciones indebidas en un plazo improrrogable de 10 días.
 2. Prohibición de cobrar por desgaste natural: La ley prohíbe descontar fondos por desgaste normal de uso de la vivienda (pintura gastada, alfombra con uso ordinario).
-3. Advertencia de daños triples (Treble Damages): Si el arrendador retiene fondos de mala fe o no envió facturas reales de contratistas a tiempo, la corte de reclamos menores puede condenarlo a pagar de 2 a 3 veces el monto del depósito más costos legales.
+3. Posibles daños adicionales: En algunos estados, si el arrendador retiene fondos de mala fe o no envió a tiempo facturas reales, la corte de reclamos menores puede ordenarle pagar hasta 2 o 3 veces el depósito más costos. Esto depende de la ley de su estado.
 
 📬 INSTRUCCIONES DE ENVÍO:
 - Envíela por Correo Certificado de USPS para tener prueba legal de que la recibieron.
@@ -214,7 +225,8 @@ Esta carta legal exige formalmente a su arrendador o compañía de administraci�
       letterBody,
       explanation: isSpanish ? spanishExplanation : null
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err) {
+    console.error('Generate letter error:', err)
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
 }
