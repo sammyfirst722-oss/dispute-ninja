@@ -15,9 +15,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'payment_required', reason: ent.reason }, { status: ent.status })
     }
 
-    const disputeType = cleanText(body.disputeType, 20, 'other')
-    const creditorName = cleanText(body.creditorName, 120)
-    const disputedAmount = cleanAmount(body.disputedAmount, '')
+    // A single-letter purchase on the web is tied to the dispute entered at checkout (from Stripe, not from the
+    // browser), so one purchase cannot be reused for other creditors. The kit and Play purchases use what was sent.
+    const bound = ent.source === 'stripe' && ent.product === 'letter' && ent.meta ? ent.meta : null
+    const disputeType = bound ? bound.disputeType : cleanText(body.disputeType, 20, 'other')
+    const creditorName = bound ? bound.creditorName : cleanText(body.creditorName, 120)
+    const disputedAmount = bound ? bound.disputedAmount : cleanAmount(body.disputedAmount, '')
     const userName = cleanText(body.userName, 120, 'Consumer')
     const accountNum = cleanText(body.accountNum, 60, 'PENDING-001')
     const lang = body.lang === 'es' ? 'es' : 'en'

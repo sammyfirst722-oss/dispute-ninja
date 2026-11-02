@@ -28,7 +28,13 @@ function fakeStripe(session: any, opts: { throws?: boolean } = {}) {
 describe('verifyStripeSession (Stripe says paid)', () => {
   it('accepts a paid letter session', async () => {
     const r = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now(), metadata: { productType: 'letter' } }))
-    expect(r).toEqual({ ok: true, product: 'letter', source: 'stripe' })
+    expect(r).toMatchObject({ ok: true, product: 'letter', source: 'stripe' })
+  })
+  it('hands back what the buyer entered at checkout, cleaned (so the letter is tied to that dispute)', async () => {
+    const r = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now(), metadata: { productType: 'letter', disputeType: 'debt', creditorName: '  Midland Credit  ', disputedAmount: '1,450.00' } }))
+    expect(r.ok && r.meta).toEqual({ disputeType: 'debt', creditorName: 'Midland Credit', disputedAmount: '1,450.00' })
+    const bad = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now(), metadata: { productType: 'letter', disputedAmount: '<script>' } }))
+    expect(bad.ok && bad.meta?.disputedAmount).toBe('')
   })
   it('accepts a paid kit session', async () => {
     const r = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now(), metadata: { productType: 'kit' } }))
@@ -48,9 +54,11 @@ describe('verifyStripeSession (Stripe says paid)', () => {
       expect(r).toMatchObject({ ok: false, reason: 'unsupported_product' })
     }
   })
-  it('rejects a session older than 60 days', async () => {
-    const r = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now() - 61 * 24 * 3600, metadata: { productType: 'letter' } }))
+  it('rejects a session older than 30 days', async () => {
+    const r = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now() - 31 * 24 * 3600, metadata: { productType: 'letter' } }))
     expect(r).toMatchObject({ ok: false, reason: 'session_expired' })
+    const ok = await verifyStripeSession(GOOD_ID, fakeStripe({ mode: 'payment', payment_status: 'paid', created: now() - 29 * 24 * 3600, metadata: { productType: 'letter' } }))
+    expect(ok.ok).toBe(true)
   })
   it('rejects ids that are not Stripe checkout ids (no Stripe call made)', async () => {
     const stripe = fakeStripe({})
@@ -134,6 +142,27 @@ describe('verifyPlayPurchase (Google Play says purchased)', () => {
   it('a well-formed but made-up token is still rejected, because Google does not know it', async () => {
     const r = await verifyPlayPurchase('disputeninja_letter', 'twa_play_token_1730000000000', { fetchImpl: fakeFetch({ status: 404 }) })
     expect(r).toMatchObject({ ok: false, status: 402, reason: 'purchase_not_found' })
+  })
+})
+
+describe('Play purchases are acknowledged before anything is delivered', () => {
+  it('entitlementFromBody acknowledges a not-yet-acknowledged purchase (through the real global fetch)', async () => {
+    const TOKEN = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    const seen: string[] = []
+    const realFetch = globalThis.fetch
+    globalThis.fetch = (async (url: any, init?: any) => {
+      const u = String(url); seen.push((init?.method || 'GET') + ' ' + u)
+      if (u.includes('oauth')) return new Response(JSON.stringify({ access_token: 'tok', expires_in: 3600 }), { status: 200 })
+      if (u.endsWith(':acknowledge')) return new Response(null, { status: 204 })
+      return new Response(JSON.stringify({ purchaseState: 0, acknowledgementState: 0 }), { status: 200 })
+    }) as typeof fetch
+    try {
+      const r = await entitlementFromBody({ playPurchase: { sku: 'disputeninja_letter', purchaseToken: TOKEN } })
+      expect(r).toMatchObject({ ok: true, product: 'letter', source: 'play' })
+      expect(seen.some((s) => s.startsWith('POST ') && s.endsWith(':acknowledge'))).toBe(true)
+    } finally {
+      globalThis.fetch = realFetch
+    }
   })
 })
 

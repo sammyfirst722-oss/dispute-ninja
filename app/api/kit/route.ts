@@ -35,5 +35,6 @@ export async function GET(req: NextRequest) {
 // Android app: the app posts the Google Play purchase for the server to check.
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
-  return sendKit(await verifyPlayPurchase(body?.playPurchase?.sku, body?.playPurchase?.purchaseToken))
+  // acknowledge:true: never hand over the kit for a Play purchase that Google has not been told about
+  return sendKit(await verifyPlayPurchase(body?.playPurchase?.sku, body?.playPurchase?.purchaseToken, { acknowledge: true }))
 }

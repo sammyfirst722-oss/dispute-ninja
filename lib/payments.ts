@@ -13,8 +13,12 @@ export const PLAY_SKUS: Record<string, ProductType> = {
   disputeninja_kit: 'kit',
 }
 
+// For a Stripe purchase, `meta` holds what the buyer entered at checkout. The letter is built from THAT,
+// so one paid letter stays tied to the dispute it was bought for (it cannot be reused for other creditors).
+export type PurchaseMeta = { disputeType: string; creditorName: string; disputedAmount: string }
+
 export type Entitlement =
-  | { ok: true; product: ProductType; source: 'stripe' | 'play' }
+  | { ok: true; product: ProductType; source: 'stripe' | 'play'; meta?: PurchaseMeta }
   | { ok: false; status: number; reason: string }
 
 const fail = (status: number, reason: string): Entitlement => ({ ok: false, status, reason })
@@ -25,7 +29,7 @@ export function getStripe(): Stripe | null {
   return new Stripe(key, { apiVersion: '2024-04-10' as any })
 }
 
-const MAX_SESSION_AGE_SECONDS = 60 * 24 * 3600 // a paid session stays valid for 60 days
+const MAX_SESSION_AGE_SECONDS = 30 * 24 * 3600 // a paid session stays valid for 30 days (shorter = less sharing of old links)
 
 /** Ask Stripe whether this Checkout Session was really paid, and for which product. */
 export async function verifyStripeSession(
@@ -42,7 +46,12 @@ export async function verifyStripeSession(
     if (Math.floor(Date.now() / 1000) - s.created > MAX_SESSION_AGE_SECONDS) return fail(402, 'session_expired')
     const product = s.metadata?.productType
     if (product !== 'letter' && product !== 'kit') return fail(402, 'unsupported_product')
-    return { ok: true, product, source: 'stripe' }
+    const meta: PurchaseMeta = {
+      disputeType: cleanText(s.metadata?.disputeType, 20, 'other'),
+      creditorName: cleanText(s.metadata?.creditorName, 120),
+      disputedAmount: cleanAmount(s.metadata?.disputedAmount, ''),
+    }
+    return { ok: true, product, source: 'stripe', meta }
   } catch {
     return fail(402, 'session_not_found')
   }
@@ -152,7 +161,9 @@ export async function verifyPlayPurchase(
 /** Decide if a request body proves payment: a Stripe session id OR a Play purchase. */
 export async function entitlementFromBody(body: any): Promise<Entitlement> {
   if (body && typeof body.sessionId === 'string') return verifyStripeSession(body.sessionId)
-  if (body?.playPurchase) return verifyPlayPurchase(body.playPurchase.sku, body.playPurchase.purchaseToken)
+  // acknowledge:true so a purchase is never delivered without being confirmed to Google
+  // (an unconfirmed purchase can be refunded by Google within 3 days while the buyer keeps the file).
+  if (body?.playPurchase) return verifyPlayPurchase(body.playPurchase.sku, body.playPurchase.purchaseToken, { acknowledge: true })
   return fail(402, 'payment_required')
 }
 
