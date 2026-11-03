@@ -4,6 +4,7 @@ import { getDisputeGuide, getAllDisputeSlugs } from '@/lib/dispute-guides'
 import { CopyButton } from '@/components/copy-button'
 import { ArrowLeft, ShieldCheck, Scale, AlertTriangle, FileText, CheckCircle2, ChevronRight, DollarSign, Download } from 'lucide-react'
 import { StickyCheckoutCTA } from '@/components/sticky-cta'
+import { SITE_URL } from '@/lib/site'
 
 export async function generateStaticParams() {
   return getAllDisputeSlugs().map((slug) => ({ slug }))
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${guide.title} | DisputeNinja`,
     description: guide.metaDescription,
     alternates: {
-      canonical: `https://dispute-ninja.vercel.app/dispute/${slug}`,
+      canonical: `${SITE_URL}/dispute/${slug}`,
     },
   }
 }

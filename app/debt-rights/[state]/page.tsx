@@ -4,7 +4,9 @@ import { ArrowLeft, Scale, AlertTriangle, CheckCircle2, ChevronRight, ExternalLi
 import { getPublishedStates, getStateBySlug, stateSlug, solRows, yearsLabel } from '@/lib/state-guides'
 import { SolCalculator } from '@/components/sol-calculator'
 
-const BASE = 'https://dispute-ninja.vercel.app'
+import { SITE_URL } from '@/lib/site'
+
+const BASE = SITE_URL
 
 export async function generateStaticParams() {
   return getPublishedStates().map((s) => ({ state: stateSlug(s.state) }))

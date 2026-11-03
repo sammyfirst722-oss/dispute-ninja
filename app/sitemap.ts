@@ -1,9 +1,10 @@
 import { MetadataRoute } from 'next'
 import { getAllDisputeSlugs } from '@/lib/dispute-guides'
 import { getPublishedStates, stateSlug } from '@/lib/state-guides'
+import { SITE_URL } from '@/lib/site'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://dispute-ninja.vercel.app'
+  const baseUrl = SITE_URL
   const slugs = getAllDisputeSlugs()
 
   const disputeUrls = slugs.map((slug) => ({

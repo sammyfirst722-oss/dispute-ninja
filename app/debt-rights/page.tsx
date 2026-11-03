@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { getPublishedStates, stateSlug } from '@/lib/state-guides'
+import { SITE_URL } from '@/lib/site'
 
 export const metadata = {
   title: 'Debt Collection Rights by State | DisputeNinja',
   description: 'Pick your state to see how long a debt collector has to sue you, your state collection law, and how to dispute a debt.',
-  alternates: { canonical: 'https://dispute-ninja.vercel.app/debt-rights' },
+  alternates: { canonical: `${SITE_URL}/debt-rights` },
 }
 
 export default function DebtRightsIndex() {
