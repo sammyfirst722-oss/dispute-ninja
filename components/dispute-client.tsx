@@ -18,8 +18,6 @@ import {
   CreditCard,
   Phone,
   Zap,
-  Star,
-  CheckCircle,
   Scale,
   Mail,
   Send,
@@ -512,22 +510,6 @@ export function DisputeClient() {
 
         {/* Social Proof & Trust Badges */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs text-slate-400">
-          <div className="flex items-center gap-1 text-amber-400 font-semibold">
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <span className="text-slate-200 ml-1">
-              {lang === 'es' ? 'Calificación 4.9/5 (+3,200 Disputas)' : '4.9/5 Rating (3,200+ Disputed)'}
-            </span>
-          </div>
-          <span className="hidden sm:inline text-slate-600">•</span>
-          <div className="flex items-center gap-1 text-emerald-400 font-semibold">
-            <CheckCircle className="w-3.5 h-3.5" />
-            <span>{lang === 'es' ? 'Alivio Promedio: $1,420' : 'Average Consumer Relief: $1,420'}</span>
-          </div>
-          <span className="hidden sm:inline text-slate-600">•</span>
           <div className="flex items-center gap-1 text-slate-300 font-semibold">
             <Lock className="w-3.5 h-3.5 text-blue-400" />
             <span>{lang === 'es' ? '100% Privado y Confidencial' : '100% Private & Confidential'}</span>
@@ -1072,8 +1054,8 @@ export function DisputeClient() {
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed">
               {lang === 'es'
-                ? 'Los compradores de deudas compran cuentas por 2 a 4 centavos por dólar sin contratos firmados originales. Al ser forzados a comprobarlo bajo juramento, hasta el 68% cancela la cuenta.'
-                : 'Debt buyers purchase accounts for 2 to 4 cents on the dollar without original signed contracts. When forced to prove chain-of-title under oath, up to 68% close the account entirely.'}
+                ? 'Los compradores de deudas suelen comprar cuentas por centavos de dólar y es posible que no tengan los contratos originales. Usted tiene derecho a pedirles que comprueben la deuda.'
+                : 'Debt buyers often purchase accounts for pennies on the dollar and may not have the original contracts. You have the right to ask them to prove the debt.'}
             </p>
           </div>
 
