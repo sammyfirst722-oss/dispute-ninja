@@ -490,8 +490,8 @@ export function DisputeClient() {
           <Shield className="w-3.5 h-3.5" />
           <span>
             {lang === 'es'
-              ? 'Respaldado por Leyes Federales de EE. UU. • 100% Legal'
-              : 'Backed by Federal Consumer Protection Laws • 100% Legal'}
+              ? 'Basado en Leyes Federales de Protección al Consumidor de EE. UU.'
+              : 'Based on U.S. Federal Consumer Protection Laws'}
           </span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
@@ -1006,6 +1006,11 @@ export function DisputeClient() {
               : (lang === 'es' ? 'Seguro vía Stripe SSL 256-Bit • Acceso Inmediato' : 'Secured by Stripe 256-Bit SSL • Instant Access')}
           </span>
         </div>
+        <p className="text-center text-[11px] text-slate-500">
+          {lang === 'es'
+            ? 'Son plantillas de autoayuda, no asesoría legal. No garantizamos ningún resultado.'
+            : 'These are self-help letter templates, not legal advice. We cannot promise any result.'}
+        </p>
         {unlockError && (
           <p role="alert" className="text-center text-xs font-semibold text-rose-300">{unlockError}</p>
         )}
@@ -1064,12 +1069,12 @@ export function DisputeClient() {
               🏥
             </div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              {lang === 'es' ? '3. 80% Facturas con Errores' : '3. 80% Medical Billing Errors'}
+              {lang === 'es' ? '3. Las Facturas Médicas Pueden Tener Errores' : '3. Medical Bills Can Have Errors'}
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed">
               {lang === 'es'
-                ? 'Estudios demuestran que 8 de cada 10 facturas médicas contienen cobros inflados ilegales o cargos de instalaciones fuera de red prohibidos por la ley federal No Surprises Act.'
-                : 'Medical billing studies show that 8 out of 10 hospital bills contain illegal upcoding or out-of-network facility charges barred under the federal No Surprises Act.'}
+                ? 'Las facturas de hospitales pueden tener errores de codificación o cargos de instalaciones fuera de red. La ley federal No Surprises Act limita algunos de estos cargos. Vale la pena revisar la factura línea por línea.'
+                : 'Hospital bills can contain coding mistakes or out-of-network facility charges. The federal No Surprises Act limits some of these charges. Checking your bill line by line is worth the time.'}
             </p>
           </div>
         </div>
