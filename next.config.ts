@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/kit': ['./private/**/*'],
   },
+  experimental: {
+    agentUpgrade: 'security',
+  },
 }
 
 export default nextConfig
