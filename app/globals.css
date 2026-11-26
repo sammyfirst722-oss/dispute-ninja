@@ -1,9 +1,141 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    scroll-padding-top: 5.5rem;
+    scroll-padding-bottom: 6rem;
+    color-scheme: dark;
+  }
+
+  html[data-text-size="large"] {
+    font-size: 118.75%;
+  }
+
   body {
-    background-color: #0b0f19;
-    color: #f3f4f6;
+    background-color: #090d16;
+    color: #f1f5f9;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    line-height: 1.55;
+  }
+
+  /* High-contrast visible focus indicator (WCAG 2.4.7 & 1.4.11 >= 3:1) */
+  :where(a:any-link, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 3px solid #fcd34d;
+    outline-offset: 2px;
+  }
+
+  /* Prevent iOS auto-zoom and enforce comfortable touch targets on inputs */
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: max(1rem, 1em);
+  }
+}
+
+/* Visually hidden utility that becomes visible when focused (for skip links) */
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background-color: #fcd34d;
+  color: #090d16;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+/* Native <dialog> modal scroll containment (prevents page scroll behind modal) */
+dialog {
+  color: #f1f5f9;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  max-width: min(36rem, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+}
+
+dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  background: rgba(2, 6, 23, 0.8);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+/* Opt-in subtle motion only when neither OS nor in-app Reduced Motion is enabled */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-reduced-motion="true"]) .dn-pressable {
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 80ms ease;
+  }
+
+  html:not([data-reduced-motion="true"]) .dn-pressable:active:not(:disabled) {
+    transform: scale(0.985);
+  }
+
+  html:not([data-reduced-motion="true"]) .dn-spin {
+    animation: spin 1s linear infinite;
+  }
+}
+
+/* Under reduced motion (OS or in-app), keep color feedback while removing spatial transforms */
+.dn-pressable {
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+html[data-reduced-motion="true"] .dn-pressable {
+  transform: none;
+}
+
+html[data-reduced-motion="true"] .dn-spin {
+  animation: none;
+}
+
+/* Clean print stylesheet for unlocked letters */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .print-letter-only {
+    border: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    font-size: 11pt !important;
+    line-height: 1.45 !important;
   }
 }

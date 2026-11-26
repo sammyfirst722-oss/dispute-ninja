@@ -2,53 +2,51 @@ import Link from 'next/link'
 
 export function EcosystemFooter() {
   return (
-    <footer className="border-t border-slate-900 bg-slate-950/80 py-8 px-4 text-center text-xs text-slate-400 mt-auto">
-      <div className="max-w-4xl mx-auto space-y-4">
-        {/* Compliance Notice */}
-        <p className="text-[11px] text-slate-400 leading-relaxed max-w-3xl mx-auto">
-          <strong className="text-slate-300">Important Legal &amp; Compliance Notice:</strong> DisputeNinja is strictly an automated self-advocacy document generation and drafting tool. We do not provide credit repair services, debt settlement, or legal advice. DisputeNinja AI is an educational technology platform to assist users representing themselves (pro-se) in administrative disputes. Use of this tool does not create an attorney-client relationship.
+    <footer className="border-t border-slate-800 bg-slate-950 py-8 px-4 text-sm text-slate-300 mt-auto no-print">
+      <div className="max-w-4xl mx-auto space-y-5">
+        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+          <strong className="text-white">Important notice:</strong> DisputeNinja is a self-help document template tool. We are not a law firm and do not give legal advice, credit repair, or debt settlement services. Using this site does not create an attorney-client relationship. Always review your facts before sending any letter.
         </p>
 
-        {/* Brand & Ecosystem Mesh Links */}
-        <div className="pt-4 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
             <a
               href="https://lowkeyaitech.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-bold text-slate-200 hover:text-emerald-400 transition-colors inline-flex items-center gap-1.5"
+              className="inline-flex items-center min-h-[44px] font-bold text-white hover:text-emerald-300 underline underline-offset-4"
             >
-              <span>A Lowkey AI Tech Product</span>
+              A Lowkey AI Tech Product
             </a>
-            <span className="text-slate-700">•</span>
-            <span>&copy; {new Date().getFullYear()} Sammy First LLC</span>
+            <span aria-hidden="true" className="text-slate-500">•</span>
+            <span className="text-slate-300">&copy; {new Date().getFullYear()} Sammy First LLC</span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 font-medium text-slate-400">
-            <Link href="/privacy" className="hover:text-emerald-400 hover:underline transition-colors">
+          <nav aria-label="Footer" className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold">
+            <Link href="/privacy" className="inline-flex items-center min-h-[44px] px-2 text-slate-200 hover:text-emerald-300 underline underline-offset-4">
               Privacy Policy
             </Link>
-            <span className="text-slate-700">•</span>
-            <Link href="/terms" className="hover:text-emerald-400 hover:underline transition-colors">
+            <Link href="/terms" className="inline-flex items-center min-h-[44px] px-2 text-slate-200 hover:text-emerald-300 underline underline-offset-4">
               Terms
             </Link>
-            <span className="text-slate-700">•</span>
+            <Link href="/debt-rights" className="inline-flex items-center min-h-[44px] px-2 text-slate-200 hover:text-emerald-300 underline underline-offset-4">
+              State Rights
+            </Link>
             <a
               href="tel:5203571814"
-              className="hover:text-emerald-400 hover:underline transition-colors"
+              className="inline-flex items-center min-h-[44px] px-2 text-slate-200 hover:text-emerald-300 underline underline-offset-4"
             >
               Hotline: (520) 357-1814
             </a>
-            <span className="text-slate-700">•</span>
             <a
               href="https://lowkeyaitech.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-emerald-400 hover:underline transition-colors"
+              className="inline-flex items-center min-h-[44px] px-2 text-slate-200 hover:text-emerald-300 underline underline-offset-4"
             >
               All Products
             </a>
-          </div>
+          </nav>
         </div>
       </div>
     </footer>

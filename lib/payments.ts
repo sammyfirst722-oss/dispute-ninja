@@ -193,3 +193,10 @@ export function cleanAmount(v: unknown, fallback = '0.00'): string {
   const s = typeof v === 'number' ? String(v) : typeof v === 'string' ? v.trim() : ''
   return /^[0-9][0-9,]{0,9}(\.[0-9]{1,2})?$/.test(s) ? s : fallback
 }
+
+/** Validate an optional client idempotency key for Stripe checkout retries (A18). */
+export function cleanIdempotencyKey(v: unknown): string | undefined {
+  if (typeof v !== 'string') return undefined
+  const s = v.trim()
+  return /^[A-Za-z0-9_-]{8,128}$/.test(s) ? s : undefined
+}

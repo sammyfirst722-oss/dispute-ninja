@@ -1,48 +1,82 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import React, { useRef, useState } from 'react'
+import { AlertTriangle, ArrowRight } from 'lucide-react'
+import { isAndroidApp } from '@/lib/play-billing'
 
 export function StickyCheckoutCTA() {
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const inFlightRef = useRef(false)
+  const keyRef = useRef<string | null>(null)
 
   const handleCheckout = async () => {
+    if (inFlightRef.current) return
+    inFlightRef.current = true
     setIsLoading(true)
+    setError('')
+
+    if (!keyRef.current) {
+      const rand =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID().replace(/-/g, '')
+          : `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+      keyRef.current = `dn_kit_${rand}`.slice(0, 64)
+    }
+
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productType: 'kit' }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': keyRef.current,
+        },
+        body: JSON.stringify({
+          productType: 'kit',
+          idempotencyKey: keyRef.current,
+          isTwa: isAndroidApp(),
+        }),
       })
-      const data = await res.json()
-      if (data.checkoutUrl) {
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.checkoutUrl) {
         window.location.href = data.checkoutUrl
-      } else {
-        alert(data.error || 'Checkout failed to load')
+        return
       }
-    } catch (err) {
-      console.error(err)
+      setError(data.error || 'Checkout could not start right now. Please try again.')
+    } catch {
+      setError('Connection error starting checkout. No charge was made — please try again.')
     } finally {
+      inFlightRef.current = false
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 shadow-2xl z-50 flex justify-center">
-      <div className="max-w-4xl w-full flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h4 className="text-white font-bold">Ready to fight back?</h4>
-          <p className="text-slate-400 text-sm">Download the complete 5-Letter Action Kit & Audit Pack instantly.</p>
+    <section className="rounded-2xl bg-slate-900 border border-emerald-500/50 p-6 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-white">5-Letter Dispute Kit — $19 one-time</h2>
+          <p className="text-sm text-slate-200">
+            Includes 5 federal self-help letter templates plus a step-by-step action guide (digital ZIP download, no subscription, not legal advice).
+          </p>
         </div>
         <button
+          type="button"
           onClick={handleCheckout}
           disabled={isLoading}
-          className="whitespace-nowrap px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-950 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+          className="min-h-[48px] whitespace-nowrap px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60 dn-pressable"
         >
-          <span>{isLoading ? 'Loading Secure Checkout...' : 'Get the $19 Action Kit'}</span>
-          {!isLoading && <Sparkles className="w-4 h-4" />}
+          <span>{isLoading ? 'Opening Stripe checkout...' : 'Get 5-Letter Kit — $19'}</span>
+          {!isLoading && <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />}
         </button>
       </div>
-    </div>
+
+      {error && (
+        <p role="alert" className="text-sm font-semibold text-rose-300 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
+    </section>
   )
 }

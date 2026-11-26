@@ -7,67 +7,67 @@ export const metadata: Metadata = {
   description: 'How DisputeNinja protects your sensitive financial and medical data.',
 }
 
-const UPDATED = 'October 3, 2026'
+const UPDATED = 'November 25, 2026'
 const CONTACT = 'sammyfirst722@gmail.com'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xl">
+    <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-8 sm:py-12 outline-none">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-10 space-y-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline mb-6"
+          className="inline-flex items-center gap-2 min-h-[44px] text-sm font-semibold text-sky-300 hover:text-sky-200 underline underline-offset-4"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to DisputeNinja
+          <ArrowLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span>Back to DisputeNinja</span>
         </Link>
 
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-blue-600">
-            <ShieldCheck className="w-6 h-6" />
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="w-7 h-7 text-emerald-400 shrink-0" aria-hidden="true" />
+            <h1 className="text-3xl font-black text-white tracking-tight">Privacy Policy</h1>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Privacy Policy</h1>
+          <p className="text-sm text-slate-300">Last updated: {UPDATED}</p>
         </div>
-        <p className="text-sm text-slate-500 mb-8">Last updated: {UPDATED}</p>
 
-        <div className="space-y-6 text-sm leading-relaxed text-slate-600">
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 mb-2">1. Overview</h2>
+        <div className="space-y-6 text-sm leading-relaxed text-slate-200">
+          <section className="space-y-2">
+            <h2 className="text-lg font-bold text-white">1. Overview</h2>
             <p>
-              DisputeNinja (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) provides AI-generated self-advocacy letters. 
-              Because you may input sensitive financial or medical information into our prompts, 
-              your privacy and security are our highest priority.
+              DisputeNinja (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) provides self-help dispute letter templates.
+              Because you may type financial or medical bill details into the form, protecting your privacy is a priority.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
-              <EyeOff className="w-4 h-4 text-blue-600" /> 2. No Data Retention
+          <section className="space-y-2">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <EyeOff className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+              <span>2. Local Drafts &amp; No Server Database Storage</span>
             </h2>
             <p>
-              The details you enter to generate a dispute letter (such as account numbers, medical codes, or balances) 
-              are processed ephemerally in memory to generate your document. We do NOT store your dispute data in any database, 
-              and we do not sell your data to debt collectors or third parties.
+              To prevent losing your work on refresh, your draft inputs are saved only in your own browser&apos;s local storage
+              on your device (and you can clear them anytime with one tap). We do not store your bill text in our own database
+              and we never sell your data to debt collectors or third parties.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 mb-2">3. Stripe Payments</h2>
+          <section className="space-y-2">
+            <h2 className="text-lg font-bold text-white">3. Stripe &amp; Google Play Payments</h2>
             <p>
-              Payments are processed securely via Stripe. We do not have access to your full credit card number or bank details. 
-              Stripe&apos;s privacy policy governs the processing of your payment information.
+              Payments are processed securely by Stripe (on the web) or Google Play (in the Android app). We never see or store
+              your full credit card number. For a Single Dispute Letter purchase, basic order details (company name, dispute type,
+              and amount) are attached to your Stripe checkout session so your letter can be delivered after payment confirmation.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-blue-600" /> 4. Contact Us
+          <section className="space-y-2">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <Mail className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+              <span>4. Contact Us</span>
             </h2>
             <p>
-              If you have any questions about this Privacy Policy, please email us directly at:{' '}
-              <a
-                href={`mailto:${CONTACT}`}
-                className="font-bold text-blue-600 underline underline-offset-2"
-              >
+              Questions about this Privacy Policy? Email{' '}
+              <a href={`mailto:${CONTACT}`} className="font-bold text-sky-300 hover:text-sky-200 underline underline-offset-4">
                 {CONTACT}
               </a>
               .
@@ -75,6 +75,6 @@ export default function PrivacyPage() {
           </section>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

@@ -6,6 +6,7 @@ import {
   entitlementFromBody,
   cleanText,
   cleanAmount,
+  cleanIdempotencyKey,
   safeOrigin,
 } from '@/lib/payments'
 
@@ -186,6 +187,12 @@ describe('input helpers', () => {
     expect(cleanAmount('1,450.50')).toBe('1,450.50')
     expect(cleanAmount('<script>')).toBe('0.00')
     expect(cleanAmount(250)).toBe('250')
+  })
+  it('cleanIdempotencyKey accepts safe retry keys and rejects invalid ones', () => {
+    expect(cleanIdempotencyKey('dn_letter_1730000000_abcd')).toBe('dn_letter_1730000000_abcd')
+    expect(cleanIdempotencyKey('short')).toBeUndefined()
+    expect(cleanIdempotencyKey('has spaces !@#')).toBeUndefined()
+    expect(cleanIdempotencyKey(undefined)).toBeUndefined()
   })
   it('safeOrigin only returns our own sites', () => {
     expect(safeOrigin('https://evil.example')).toBe('https://dispute-ninja.vercel.app')
